@@ -37,6 +37,12 @@
 
 ---
 
+## 📜 สัญญาอนุญาต (License)
+
+โปรเจกต์นี้ใช้สัญญาอนุญาตแบบ **Apache License 2.0** สามารถดูรายละเอียดเพิ่มเติมได้ที่ไฟล์ [LICENSE](LICENSE)
+
+---
+
 ## 💬 การสนับสนุนและชุมชน (Support & Community)
 
 *   **Discord**: [เข้าร่วมชุมชน Silver Wolf](https://discord.gg/QwfTnEdAtN)
