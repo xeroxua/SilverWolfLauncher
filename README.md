@@ -1,5 +1,7 @@
 # Silver Wolf Launcher 🐺
 
+![Silver Wolf Launcher Preview](Assets/preview.png)
+
 โปรแกรม Launcher ระดับพรีเมียมสำหรับเชื่อมต่อและจัดการ Private Server ของเกม **Honkai: Star Rail** พัฒนาด้วย .NET 10.0 และ WPF เพื่อประสบการณ์ที่ลื่นไหลและสวยงาม
 
 ---
