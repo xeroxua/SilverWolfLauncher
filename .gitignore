@@ -1,0 +1,36 @@
+# User-requested exclusions
+bin/
+obj/
+SilverWolfLauncher_Source.7z
+
+# .NET / Visual Studio
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Tt]est[Rr]esults/
+*.tmp
+*.log
+*.cache
+*.pdb
+*.exe
+*.dll
+
+# Security Sensitive
+.env
+appsettings.json
+appsettings.*.json
+secrets.json
+*.p12
+*.pfx
+*.pem
+*.key
+*.pub
+
+# OS specific
+.DS_Store
+Thumbs.db
