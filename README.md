@@ -1,54 +1,63 @@
 # Silver Wolf Launcher 🐺
+*Advanced Launcher for Honkai: Star Rail Private Servers*
 
 ![Silver Wolf Launcher Preview](Assets/preview.png)
 
-โปรแกรม Launcher ระดับพรีเมียมสำหรับเชื่อมต่อและจัดการ Private Server ของเกม **Honkai: Star Rail** พัฒนาด้วย .NET 10.0 และ WPF เพื่อประสบการณ์ที่ลื่นไหลและสวยงาม
+**Silver Wolf Launcher** คือเครื่องมือระดับพรีเมียมที่ออกแบบมาเพื่อให้การจัดการและเข้าเล่น **Honkai: Star Rail Private Server** เป็นเรื่องง่าย สวยงาม และทรงพลัง พัฒนาด้วยเทคโนโลยีล่าสุดอย่าง **.NET 10.0** และ **WPF** พร้อมดีไซน์ที่ได้รับแรงบันดาลใจจากสไตล์ Mobile UI ของเกมโดยตรง
 
-> [!NOTE]
-> **สถานะการพัฒนา**: โปรแกรมนี้ยังอยู่ในช่วง **Early Access** อาจพบข้อผิดพลาด (Bugs) ได้บ้างในบางจุด หากพบปัญหาท่านสามารถแจ้งได้ที่ [Discord](https://discord.gg/QwfTnEdAtN) ครับ
-
----
-
-## ✨ คุณสมบัติหลัก (Features)
-
-*   **⚡ Easy Launch**: เชื่อมต่อเข้าสู่โลกแห่งดวงดาวได้ทันทีเพียงคลิกเดียว
-*   **🛠️ Private Server Management**: ติดตั้งและอัปเดตไฟล์ Private Server (PS) ได้โดยตรงผ่าน Launcher
-*   **🌐 Integrated Proxy**: ระบบ Proxy ในตัว ไม่ต้องตั้งค่าให้วุ่นวาย
-*   **🩹 Game Patcher**: รองรับการลง Patch เกม (ไฟล์ .7z, .zip) พร้อมระบบจัดการไฟล์อัตโนมัติ
-*   **🌍 Multi-Language Support**: รองรับการเปลี่ยนภาษาทั้งในตัว Launcher และตัวเกม (Text/Voice)
-*   **📖 WebView Tools**: รวมเครื่องมือเสริมและคู่มือการเล่นไว้ในตัวเดียว
-*   **🌙 Modern UI**: ดีไซน์ที่ทันสมัย พร้อมระบบย่อโปรแกรมลง Tray (Minimize to Tray)
+> [!IMPORTANT]
+> **Project Status**: ปัจจุบันอยู่ในสถานะ **Early Access** ผลงานชิ้นนี้พัฒนาโดยอิสระเพื่อชุมชน หากพบปัญหาท่านสามารถแจ้งได้ที่ [Discord Community](https://discord.gg/QwfTnEdAtN)
 
 ---
 
-## 🚀 เริ่มต้นใช้งาน (Getting Started)
+## ✨ คุณสมบัติที่โดดเด่น (Key Features)
 
-1.  **เลือกที่อยู่ไฟล์เกม**: กดปุ่ม **Browse** ในหน้า Settings เพื่อระบุตำแหน่งไฟล์ `.exe` ของเกม Honkai: Star Rail
-2.  **ติดตั้ง Private Server**: หากยังไม่มีไฟล์ PS โปรแกรมจะแจ้งเตือนให้ติดตั้งโดยอัตโนมัติ หรือกดปุ่ม **Update PS** ในหน้า Home
-3.  **ตั้งค่าภาษา**: เลือกภาษาที่ต้องการใช้งานในหน้า Language
-4.  **เข้าเล่นเกม**: กดปุ่ม **Launch Game** เพื่อเริ่มต้นการผจญภัย!
+*   **🎨 Premium HSR Aesthetic**: อินเทอร์เฟซแบบ Glassmorphism ที่สวยงามและลื่นไหล พร้อมระบบอนิเมชั่นที่ถอดแบบมาจากตัวเกม
+*   **⚡ One-Click Launch**: ระบบเริ่มเกมที่รวบรวมการเปิด Proxy และ Private Server ไว้ในคลิกเดียว
+*   **🛡️ Robust Watchdog**: ระบบเฝ้าระวังอัตโนมัติ หาก Server หรือ Proxy ปิดตัวลง Launcher จะพยายาม Re-launch ให้ทันทีภายใน 5 วินาที
+*   **🩹 Smart Patcher**: รองรับการลง Patch (.7z, .zip) แบบอัตโนมัติ พร้อมระบบจัดการความขัดแย้งของไฟล์ผ่าน `hpatchz`
+*   **🌐 Seamless Web Integration**: รวมเครื่องมือเสริม (SR Tools) และคู่มือการเล่นผ่าน WebView2 พร้อมระบบ **Airspace-Fix** (หน้าต่างแจ้งเตือนจะไม่ถูกเว็บทับ)
+*   **🌍 Localization Expert**: รองรับการเปลี่ยนภาษาทั้งตัวโปรแกรมและตัวเกม (Text/Voice) อย่างสมบูรณ์
+*   **🌙 System Tray Integration**: ย่อโปรแกรมลง Tray พร้อมเมนูทางลัดเพื่อประหยัดทรัพยากรเครื่อง
 
 ---
 
-## 🛡️ ข้อมูลด้านความปลอดภัย (Security & Safety)
+## 🛠️ การติดตั้งและเริ่มต้นใช้งาน (Getting Started)
 
-*   โปรแกรมนี้มีการเรียกใช้งาน `hpatchz.exe` เพื่อจัดการไฟล์ Patch กรุณาตรวจสอบให้แน่ใจว่าโปรแกรมอยู่ในโฟลเดอร์ที่มีสิทธิ์เขียนไฟล์ (Write Permission)
-*   เราให้ความสำคัญกับความเป็นส่วนตัว: ไฟล์กำหนดค่าต่างๆ (config.json) จะถูกเก็บไว้เฉพาะในเครื่องของคุณเท่านั้น
+### สำหรับผู้ใช้งานทั่วไป (Users)
+1.  **Set Game Path**: เข้าไปที่ส่วนจัดการตำแหน่งไฟล์ เลือกไฟล์ `.exe` ของเกม Honkai: Star Rail
+2.  **Environment Check**: โปรแกรมจะตรวจสอบไฟล์ Private Server ให้อัตโนมัติ หากไม่มีสามารถกด **Update** เพื่อติดตั้งได้ทันที
+3.  **Launch**: กดปุ่ม **LAUNCH** เพื่อเริ่มการเดินทางข้ามกลุ่มดาว
+
+### สำหรับนักพัฒนา (Developers)
+หากท่านต้องการร่วมพัฒนาหรือคอมไพล์โค้ดด้วยตนเอง:
+*   **Requirements**: Visual Studio 2022 หรือ .NET 10.0 SDK
+*   **Build**:
+    ```bash
+    dotnet build -c Release
+    ```
+
+---
+
+## 🛡️ ความปลอดภัยและความเป็นส่วนตัว (Security & Privacy)
+
+*   **No Data Collections**: เราไม่มีการเก็บข้อมูลส่วนตัวใดๆ ไฟล์ `config.json` จะถูกเก็บไว้เฉพาะในเครื่องของผู้ใช้เท่านั้น
+*   **Open Source**: ท่านสามารถตรวจสอบโค้ดทั้งหมดได้เพื่อความมั่นใจในความโปร่งใส
 
 ---
 
 ## 📜 สัญญาอนุญาต (License)
 
-โปรเจกต์นี้ใช้สัญญาอนุญาตแบบ **Apache License 2.0** สามารถดูรายละเอียดเพิ่มเติมได้ที่ไฟล์ [LICENSE](LICENSE)
+โปรเจกต์นี้เปิดเผยซอร์สโค้ดภายใต้สัญญาอนุญาต **Apache License 2.0** ท่านสามารถนำไปศึกษาและพัฒนาต่อยอดได้ตามเงื่อนไขที่กำหนด
 
 ---
 
-## 💬 การสนับสนุนและชุมชน (Support & Community)
+## 💬 การสนับสนุนและชุมชน (Support)
 
-*   **Discord**: [เข้าร่วมชุมชน Silver Wolf](https://discord.gg/QwfTnEdAtN)
-*   **GitHub**: [ติดตามผู้พัฒนา (xeroxua)](https://github.com/xeroxua)
+*   **Discord**: [Silver Wolf Community](https://discord.gg/QwfTnEdAtN)
+*   **Developer**: [Follow xeroxua on GitHub](https://github.com/xeroxua)
 
 ---
 
-**จัดทำโดย xeroxua**
-*(Disclaimer: โปรแกรมนี้เป็นโปรแกรมเสริมที่พัฒนาโดยผมเอง ไม่ได้มีความเกี่ยวข้องอย่างเป็นทางการกับ HoYoverse)*
+**Crafted with 💖 by xeroxua**
+*Disclaimer: Silver Wolf Launcher เป็นโปรเจกต์อิสระ ไม่ได้มีความเกี่ยวข้องกับ HoYoverse หรือบริษัทเจ้าของลิขสิทธิ์เกมแต่อย่ายใด*
