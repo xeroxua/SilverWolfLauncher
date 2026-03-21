@@ -2,8 +2,6 @@
 bin/
 obj/
 SilverWolfLauncher_Source.7z
-CHANGELOG.md
-Build-Release.ps1
 
 # .NET / Visual Studio
 *.user
