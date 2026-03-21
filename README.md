@@ -6,7 +6,7 @@
 **Silver Wolf Launcher** คือเครื่องมือระดับพรีเมียมที่ออกแบบมาเพื่อให้การจัดการและเข้าเล่น **Honkai: Star Rail Private Server** เป็นเรื่องง่าย สวยงาม และทรงพลัง พัฒนาด้วยเทคโนโลยีล่าสุดอย่าง **.NET 10.0** และ **WPF**
 
 > [!IMPORTANT]
-> **Project Status**: ปัจจุบันอยู่ในสถานะ **Early Access** ผลงานชิ้นนี้พัฒนาโดยอิสระเพื่อชุมชน หากพบปัญหาท่านสามารถแจ้งได้ที่ [Discord Community](https://discord.gg/QwfTnEdAtN)
+> **Project Status**: ปัจจุบันอยู่ในสถานะ **Early Access** ผลงานชิ้นนี้พัฒนาโดยอิสระเพื่อชุมชน ยังไม่มีกำหนดการปล่อยเวอร์ชันอย่างเป็นทางการ และหากพบปัญหาท่านสามารถแจ้งได้ที่ [Discord Community](https://discord.gg/QwfTnEdAtN)
 
 ---
 
