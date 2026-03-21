@@ -16,9 +16,7 @@
 *   **⚡ One-Click Launch**: ระบบเริ่มเกมรวม Proxy และ Server ในคลิกเดียว
 *   **🔄 Integrated Auto-Update**: ระบบตรวจสอบและอัปเดตตัวเองอัตโนมัติผ่าน GitHub
 *   **🛡️ Robust Watchdog**: ระบบเฝ้าระวังและรีสตาร์ทบริการอัตโนมัติภายใน 5 วินาที
-*   **🚫 Single Instance Only**: ระบบป้องกันการรันโปรแกรมซ้อนกัน เพื่อความเสถียรสูงสุด
-*   **🌐 Seamless Integration**: รวมเครื่องมือเสริม (SR Tools) และตัว Patch ไฟล์เกมไว้ที่เดียว
-*   **🔘 Smart Play Button**: ปุ่มเริ่มเกมจะปรับเปลี่ยนสถานะตามความถูกต้องของ Path เกม
+*   **🌐 Seamless Integration**: รวมเครื่องมือเสริม (SR Tools) และตัว Hdiff ที่เอาไว้ Update เกม
 
 ---
 
