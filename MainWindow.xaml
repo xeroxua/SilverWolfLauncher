@@ -5,82 +5,64 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
-        Title="SilverWolf-Launcher" Height="720" Width="1280"
-        WindowStartupLocation="CenterScreen"
-        Background="#1E1E24"
-        WindowStyle="None"
-        AllowsTransparency="True"
-        ResizeMode="NoResize"
+        Title="SilverWolf-Launcher" Height="810" Width="1440"
+        WindowStartupLocation="CenterScreen" Background="#1E1E24"
+        WindowStyle="None" AllowsTransparency="True" ResizeMode="CanMinimize"
         Icon="pack://application:,,,/Assets/SilverWolficon.ico">
 
     <Window.Resources>
-        <!-- Global Text Shadow for readability -->
         <Style TargetType="TextBlock">
             <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality"/>
             <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="3" Color="Black" Opacity="0.7" ShadowDepth="1"/>
-                </Setter.Value>
+                <Setter.Value><DropShadowEffect BlurRadius="3" Color="Black" Opacity="0.7" ShadowDepth="1"/></Setter.Value>
             </Setter>
         </Style>
-        <!-- Glow Effect Style -->
-        <Style x:Key="GlowBorder" TargetType="Border">
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="#C75CFF" Opacity="0.5"/>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Modern Button Style -->
         <Style x:Key="ModernNavButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#88FFFFFF"/>
-            <Setter Property="FontSize" Value="24"/>
-            <Setter Property="Margin" Value="0,10"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#88FFFFFF"/>
+            <Setter Property="FontSize" Value="22"/><Setter Property="Margin" Value="0,6"/>
+            <Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Grid Background="Transparent">
-                            <Border x:Name="activeIndicator" Width="4" HorizontalAlignment="Left" Background="#C75CFF" Opacity="0" CornerRadius="0,2,2,0"/>
+                        <Grid Background="Transparent" x:Name="LayoutRoot">
+                            <Grid.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Grid.RenderTransform>
+                            <Border x:Name="ind" Width="3" HorizontalAlignment="Left" Background="#FFD700" Opacity="0" CornerRadius="0,2,2,0"/>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="White"/>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="White"/></Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="0.9" Duration="0:0:0.1" /><DoubleAnimation Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0.9" Duration="0:0:0.1" /></Storyboard></BeginStoryboard></Trigger.EnterActions>
+                                <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.1" /><DoubleAnimation Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.1" /></Storyboard></BeginStoryboard></Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- Active Button Style (HSR Refined) -->
         <Style x:Key="ActiveNavButton" TargetType="Button" BasedOn="{StaticResource ModernNavButton}">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Grid Background="#33FFFFFF">
-                            <Border x:Name="activeIndicator" Width="4" HorizontalAlignment="Left" Background="#C75CFF" Opacity="1" CornerRadius="0,2,2,0">
-                                <Border.Effect><DropShadowEffect BlurRadius="12" Color="#C75CFF" Opacity="0.8" ShadowDepth="0"/></Border.Effect>
-                            </Border>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <ContentPresenter.Effect><DropShadowEffect BlurRadius="8" Color="White" Opacity="0.4" ShadowDepth="0"/></ContentPresenter.Effect>
-                            </ContentPresenter>
+                        <Grid Background="#22FFFFFF" x:Name="LayoutRoot">
+                            <Grid.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Grid.RenderTransform>
+                            <Border Width="3" HorizontalAlignment="Left" Background="#FFD700" Opacity="1" CornerRadius="0,2,2,0"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="0.9" Duration="0:0:0.1" /><DoubleAnimation Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0.9" Duration="0:0:0.1" /></Storyboard></BeginStoryboard></Trigger.EnterActions>
+                                <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.1" /><DoubleAnimation Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.1" /></Storyboard></BeginStoryboard></Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- Modern CheckBox Style (HSR STYLE) -->
         <Style x:Key="ModernCheckBox" TargetType="CheckBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/><Setter Property="FontSize" Value="14"/><Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
@@ -96,183 +78,144 @@
                         </BulletDecorator>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#C75CFF"/>
-                                <Setter TargetName="Dot" Property="Fill" Value="White"/>
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="Dot" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="21" Duration="0:0:0.2"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="Dot" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="0" Duration="0:0:0.2"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.ExitActions>
+                                <Setter TargetName="Border" Property="Background" Value="#FFD700"/>
+                                <Setter TargetName="Dot" Property="Fill" Value="#1A1A1A"/>
+                                <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="Dot" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="21" Duration="0:0:0.2"/></Storyboard></BeginStoryboard></Trigger.EnterActions>
+                                <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="Dot" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="0" Duration="0:0:0.2"/></Storyboard></BeginStoryboard></Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        
-        <!-- Social Button Style -->
-        <Style x:Key="SocialButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#AAA"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Margin" Value="5,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
+        <Style x:Key="RoundedProgressBarStyle" TargetType="ProgressBar">
+            <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"/>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="#00E5FF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid>
+                            <Border Background="#33FFFFFF" CornerRadius="3"/>
+                            <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="3" HorizontalAlignment="Left">
+                                <Border.Effect><DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#FFD700" Opacity="0.6"/></Border.Effect>
+                            </Border>
+                            <Border x:Name="PART_Track"/>
+                        </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
     </Window.Resources>
 
-
     <Grid>
-        <!-- Background Layer -->
-        <Image Source="pack://application:,,,/Assets/SilverwolfBG.png" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality">
-            <Image.Effect>
-                <BlurEffect x:Name="BackgroundBlur" Radius="0"/>
-            </Image.Effect>
-        </Image>
+        <!-- ═══ Background (Video + Static Fallback) ═══ -->
+        <Image x:Name="BgFallbackImage" Source="pack://application:,,,/Assets/SilverwolfBG.png" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
+        <MediaElement x:Name="BgVideo" Stretch="UniformToFill" LoadedBehavior="Manual" UnloadedBehavior="Manual"
+                      MediaEnded="BgVideo_MediaEnded" MediaFailed="BgVideo_MediaFailed" MediaOpened="BgVideo_MediaOpened" Volume="0" IsMuted="True" />
+        <Border x:Name="BgDimOverlay" Background="#DD05050A" Opacity="0" IsHitTestVisible="False" />
 
-        <!-- Glassmorphism Overlay -->
-        <Border>
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#550A0518" Offset="0"/>
-                    <GradientStop Color="#44120A2B" Offset="0.5"/>
-                    <GradientStop Color="#551A0C2B" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.Background>
-        </Border>
-
-        <!-- Title Bar (HSR STYLE) -->
-        <Grid Height="50" VerticalAlignment="Top" Background="#33000000" Panel.ZIndex="1000" MouseLeftButtonDown="TopBar_MouseLeftButtonDown">
-            <StackPanel Orientation="Horizontal" Margin="20,0">
-                <Image Source="pack://application:,,,/Assets/SilverWolficon.png" Width="20" Height="20" VerticalAlignment="Center" Opacity="0.8"/>
-                <TextBlock Text="SILVERWOLF LAUNCHER" Foreground="#88FFFFFF" FontSize="12" FontWeight="Black" VerticalAlignment="Center" Margin="10,0,0,0">
-                    <TextBlock.Effect><DropShadowEffect BlurRadius="4" Color="Black" Opacity="0.5"/></TextBlock.Effect>
-                </TextBlock>
+        <!-- ═══ Title Bar (Endfield Style) ═══ -->
+        <Grid Height="50" VerticalAlignment="Top" Background="Transparent" Panel.ZIndex="1000" MouseLeftButtonDown="TopBar_MouseLeftButtonDown">
+            <StackPanel Orientation="Horizontal" Margin="22,0" VerticalAlignment="Center">
+                <Image Source="pack://application:,,,/Assets/SilverWolficon.png" Width="30" Height="30" Opacity="0.95"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
-            <!-- Titlebar Action Buttons (HSR STYLE) -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,15,0">
-                <Button x:Name="BtnTopSettings" Content="&#xE713;" FontFamily="Segoe Fluent Icons" Width="40" Height="40" Background="Transparent" Foreground="#88FFFFFF" BorderThickness="0" Click="BtnSettings_Click" FontSize="16" ToolTip="Settings">
-                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="20"/></Style></Button.Resources>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,18,0">
+                <Button Content="&#xE713;" FontFamily="Segoe Fluent Icons" Width="38" Height="38" Foreground="White" FontSize="15" BorderThickness="0" Click="BtnSettings_Click" ToolTip="Settings" Cursor="Hand" Background="#CC222222">
+                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="19"/></Style></Button.Resources>
                 </Button>
-                <Button Content="&#xE921;" FontFamily="Segoe Fluent Icons" Width="40" Height="40" Background="Transparent" Foreground="#88FFFFFF" BorderThickness="0" Click="BtnMinimize_Click" FontSize="14" ToolTip="Minimize">
-                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="20"/></Style></Button.Resources>
+                <Button Content="&#xE921;" FontFamily="Segoe Fluent Icons" Width="38" Height="38" Foreground="White" FontSize="14" BorderThickness="0" Click="BtnMinimize_Click" ToolTip="Minimize" Cursor="Hand" Background="#CC222222" Margin="8,0,0,0">
+                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="19"/></Style></Button.Resources>
                 </Button>
-                <Button Content="&#xE8BB;" FontFamily="Segoe Fluent Icons" Width="40" Height="40" Background="Transparent" Foreground="#FFFF4081" BorderThickness="0" Click="BtnClose_Click" FontSize="14" ToolTip="Close">
-                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="20"/></Style></Button.Resources>
+                <Button Content="&#xE8BB;" FontFamily="Segoe Fluent Icons" Width="38" Height="38" Foreground="White" FontSize="14" BorderThickness="0" Click="BtnClose_Click" ToolTip="Close" Cursor="Hand" Background="#CC222222" Margin="8,0,0,0">
+                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="19"/></Style></Button.Resources>
                 </Button>
-            </StackPanel>
             </StackPanel>
         </Grid>
 
+        <!-- ═══ Main Layout: Sidebar + Content ═══ -->
         <Grid Margin="0,50,0,0" ClipToBounds="True">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="70"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Premium Glass Sidebar (HSR STYLE) -->
-            <Border Grid.RowSpan="3" Width="80" HorizontalAlignment="Left" Background="#CC0D0B1E" BorderBrush="White" BorderThickness="0,0,1,0" Opacity="0.95">
-                <Border.Effect><DropShadowEffect BlurRadius="30" ShadowDepth="0" Color="Black" Opacity="0.3"/></Border.Effect>
+            <!-- Left Sidebar (Endfield Dark Strip) -->
+            <Border Width="70" HorizontalAlignment="Left" Background="#DD111118" Opacity="0.97">
                 <Grid>
-                    <StackPanel Margin="0,20,0,0">
-                        <!-- App Brand / Version -->
-                        <Grid HorizontalAlignment="Center" Margin="0,10,0,40">
-                             <Image Source="pack://application:,,,/Assets/SilverWolficon.png" Width="45" Height="45" Opacity="0.8"/>
+                    <StackPanel Margin="0,15,0,0">
+                        <Grid HorizontalAlignment="Center" Margin="0,5,0,30">
+                            <Image Source="pack://application:,,,/Assets/SilverWolficon.png" Width="40" Height="40" Opacity="0.85"/>
                         </Grid>
-                        
-                        <!-- Nav Buttons (Thin Style) -->
-                        <!-- Nav Buttons (Refined HSR) -->
-                        <Button x:Name="BtnHome" Content="&#xE80F;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ActiveNavButton}" Click="BtnHome_Click" ToolTip="{DynamicResource L_Dashboard}" FontSize="24" Height="50" Margin="0,8"/>
-                        <Button x:Name="BtnLanguage" Content="&#xF2B7;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnLanguage_Click" ToolTip="{DynamicResource L_Localization}" FontSize="24" Height="50" Margin="0,8"/>
-                        <Button x:Name="BtnProxy" Content="&#xE94B;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnProxy_Click" ToolTip="Proxy &amp; Server Manager" FontSize="24" Height="50" Margin="0,8"/>
-                        <Button x:Name="BtnPatcher" Content="&#xE945;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnPatcher_Click" ToolTip="{DynamicResource L_PatchTools}" FontSize="24" Height="50" Margin="0,8"/>
-                        <Button x:Name="BtnSRTools" Content="&#xE8A5;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnSRTools_Click" ToolTip="{DynamicResource L_SRTools}" FontSize="24" Height="50" Margin="0,8"/>
-                        <Button x:Name="BtnTutorials" Content="&#xE8B0;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnTutorials_Click" ToolTip="{DynamicResource L_Guides}" FontSize="24" Height="50" Margin="0,8"/>
-                        <Button x:Name="BtnInfo" Content="&#xE946;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnInfo_Click" ToolTip="{DynamicResource L_Info}" FontSize="24" Height="50" Margin="0,8"/>
+                        <Button x:Name="BtnHome" Content="&#xE80F;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ActiveNavButton}" Click="BtnHome_Click" ToolTip="{DynamicResource L_Dashboard}" Height="46" Margin="0,4"/>
+                        <Button x:Name="BtnLanguage" Content="&#xF2B7;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnLanguage_Click" ToolTip="{DynamicResource L_Localization}" Height="46" Margin="0,4"/>
+                        <Button x:Name="BtnProxy" Content="&#xE94B;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnProxy_Click" ToolTip="Services" Height="46" Margin="0,4"/>
+                        <Button x:Name="BtnPatcher" Content="&#xE945;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnPatcher_Click" ToolTip="{DynamicResource L_PatchTools}" Height="46" Margin="0,4"/>
+                        <Button x:Name="BtnSRTools" Content="&#xE8A5;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnSRTools_Click" ToolTip="{DynamicResource L_SRTools}" Height="46" Margin="0,4"/>
+                        <Button x:Name="BtnInfo" Content="&#xE946;" FontFamily="Segoe Fluent Icons" Style="{StaticResource ModernNavButton}" Click="BtnInfo_Click" ToolTip="{DynamicResource L_Info}" Height="46" Margin="0,4"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Main Area Panels -->
+            <!-- ═══ Content Panels ═══ -->
             <Grid Grid.Column="1">
-                <!-- Home -->
-                <Grid x:Name="PanelHome" Visibility="Visible">
-                    <Grid Margin="40">
-                        <StackPanel VerticalAlignment="Top" Margin="0,20,0,0">
-                            <Image Source="pack://application:,,,/Assets/SilverWolficon.png" Width="100" Height="100" HorizontalAlignment="Left" Opacity="0.15">
-                                <Image.Effect>
-                                    <BlurEffect Radius="5"/>
-                                </Image.Effect>
-                            </Image>
-                        </StackPanel>
-                        <!-- Action Area (Original Right Aligned) -->
-                        <Grid VerticalAlignment="Bottom" Margin="0,0,40,30">
-                            <StackPanel HorizontalAlignment="Right">
-                                <!-- Status Line -->
-                                <Border Background="#66000000" CornerRadius="4" Padding="12,4" HorizontalAlignment="Right" Margin="0,0,0,10">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="HSR BETA | 1.0.0" Foreground="#AAA" FontSize="10"/>
-                                    </StackPanel>
-                                </Border>
 
-                                <!-- Orange Launch/Select Button -->
-                                <Border Background="#FFAF4F" CornerRadius="10" Width="260" Height="60">
-                                    <Border.Effect><DropShadowEffect BlurRadius="25" ShadowDepth="0" Color="#FFAF4F" Opacity="0.3"/></Border.Effect>
-                                    <Button x:Name="BtnLaunchGame" Background="Transparent" BorderThickness="0" Foreground="#120A2B" FontSize="22" FontWeight="Black" Content="{DynamicResource L_Launch}" Click="BtnLaunchGame_Click"/>
-                                </Border>
-                            </StackPanel>
-                            
-                            <!-- Menu Button (Far Right) -->
-                            <Button x:Name="BtnSettings" Style="{StaticResource ModernNavButton}" Content="&#xE700;" FontFamily="Segoe Fluent Icons" FontSize="24" Width="60" Height="60" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-20,-10" Click="BtnSettings_Click" Visibility="Collapsed"/>
-                        </Grid>
-                        
-                        <!-- Game Path Manager (Moved above the floating dashboard) -->
-                        <Border Background="#E60D0B1E" CornerRadius="15" Padding="25" Margin="0,0,0,120" VerticalAlignment="Bottom">
-                            <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="GAME PATH" Foreground="White" FontSize="11" FontWeight="Black" Opacity="0.6" Margin="0,0,0,10"/>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                        <TextBox x:Name="TxtGamePath" Background="Transparent" Foreground="#AAA" BorderThickness="0,0,0,1" BorderBrush="#00E5FF" FontSize="13" IsReadOnly="True" VerticalContentAlignment="Center" Margin="0,0,20,0"/>
-                                        <Button Grid.Column="1" Content="BROWSE" Foreground="#00E5FF" Padding="20,5" Background="#1A00E5FF" BorderThickness="1" BorderBrush="#3300E5FF" FontWeight="Bold" Click="BtnBrowseGame_Click">
-                                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="5"/></Style></Button.Resources>
-                                        </Button>
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
+                <!-- HOME -->
+                <Grid x:Name="PanelHome" Visibility="Visible">
+                    <TextBox x:Name="TxtGamePath" Visibility="Collapsed"/>
+                    <Button x:Name="BtnSettings" Visibility="Collapsed" Click="BtnSettings_Click"/>
+
+                    <!-- Right Social Icons (Endfield Style) -->
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <Button Content="&#xE774;" FontFamily="Segoe Fluent Icons" Width="36" Height="36" Background="#AA222222" Foreground="#CCFFFFFF" FontSize="15" BorderThickness="0" Click="OpenDiscord" Cursor="Hand" Margin="0,4" ToolTip="Discord">
+                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="18"/></Style></Button.Resources>
+                        </Button>
+                        <Button Content="&#xE943;" FontFamily="Segoe Fluent Icons" Width="36" Height="36" Background="#AA222222" Foreground="#CCFFFFFF" FontSize="15" BorderThickness="0" Click="OpenGithub" Cursor="Hand" Margin="0,4" ToolTip="GitHub">
+                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="18"/></Style></Button.Resources>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Bottom-Right: Play + Hamburger (Endfield Style) -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,30,28">
+                        <Button x:Name="BtnLaunchGame" Width="54" Height="54" Cursor="Hand" ToolTip="Play" Click="BtnLaunchGame_Click" Background="Transparent" BorderThickness="0">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="PlayRing" CornerRadius="27" RenderTransformOrigin="0.5,0.5">
+                                        <Border.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Border.RenderTransform>
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#FFD700" Offset="0"/><GradientStop Color="#FFAF4F" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <Border.Effect><DropShadowEffect BlurRadius="18" ShadowDepth="0" Color="#FFD700" Opacity="0.5"/></Border.Effect>
+                                        <TextBlock Text="&#xE768;" FontFamily="Segoe Fluent Icons" Foreground="#1A1A1A" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="PlayRing" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="0.85" Duration="0:0:0.1"/><DoubleAnimation Storyboard.TargetName="PlayRing" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0.85" Duration="0:0:0.1"/></Storyboard></BeginStoryboard></Trigger.EnterActions>
+                                            <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="PlayRing" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.1"/><DoubleAnimation Storyboard.TargetName="PlayRing" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.1"/></Storyboard></BeginStoryboard></Trigger.ExitActions>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="PlayRing" Property="Effect"><Setter.Value><DropShadowEffect BlurRadius="25" ShadowDepth="0" Color="#FFFFFF" Opacity="0.8"/></Setter.Value></Setter>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <TextBlock x:Name="TxtPlayLabel" Text="Play" Foreground="White" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" Margin="12,0,16,0"/>
+                        <Border Width="54" Height="54" CornerRadius="27" Background="#DD222222" Cursor="Hand">
+                            <Button x:Name="BtnHamburgerHome" Content="&#xE700;" FontFamily="Segoe Fluent Icons" FontSize="20" Background="Transparent" Foreground="White" BorderThickness="0" Click="BtnHamburger_Click" ToolTip="Menu"/>
                         </Border>
-                    </Grid>
+                    </StackPanel>
+
+                    <!-- Bottom info text -->
+                    <TextBlock Text="SilverWolf Launcher v1.2.0" Foreground="#66FFFFFF" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,30,8"/>
                 </Grid>
 
-
-                <!-- Patcher (HSR STYLE) -->
+                <!-- PATCHER -->
                 <Grid x:Name="PanelPatcher" Visibility="Hidden">
                     <Border Background="#E60D0B1E" Margin="40" CornerRadius="20" Padding="40" VerticalAlignment="Center" HorizontalAlignment="Center" Width="600">
                         <StackPanel>
                             <TextBlock Text="{DynamicResource L_PatchTitle}" Foreground="White" FontSize="32" FontWeight="Black" TextAlignment="Center"/>
                             <TextBlock Text="{DynamicResource L_PatchDesc}" Foreground="#AAA" Margin="0,10,0,40" TextAlignment="Center" FontSize="14"/>
-                            
                             <Border Background="#1AFFFFFF" CornerRadius="12" Padding="20" Margin="0,0,0,30">
                                 <StackPanel>
                                     <Button Content="{DynamicResource L_ChooseFile}" Background="#FFAF4F" Foreground="#120A2B" FontWeight="Bold" Padding="25,12" Click="BtnSelectPatch_Click" HorizontalAlignment="Center">
@@ -281,285 +224,227 @@
                                     <TextBlock x:Name="TxtPatchPath" Text="..." Foreground="#00E5FF" TextAlignment="Center" Margin="0,15,0,0" FontSize="12" FontWeight="Bold"/>
                                 </StackPanel>
                             </Border>
-
                             <Button Content="{DynamicResource L_ApplyPatch}" Width="250" Height="55" Background="#C75CFF" Foreground="White" FontWeight="Bold" FontSize="18" Click="BtnApplyPatch_Click">
                                 <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="12"/></Style></Button.Resources>
-                                <Button.Effect><DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="#C75CFF" Opacity="0.4"/></Button.Effect>
                             </Button>
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <!-- Proxy & Server Manager (HSR STYLE) -->
+                <!-- PROXY / SERVICES -->
                 <Grid x:Name="PanelProxy" Visibility="Hidden">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="40">
                         <StackPanel>
-                            <TextBlock Text="SERVICES" Foreground="#00E5FF" FontSize="28" FontWeight="Black" Margin="0,0,0,5"/>
+                            <TextBlock Text="SERVICES" Foreground="#FFD700" FontSize="28" FontWeight="Black" Margin="0,0,0,5"/>
                             <TextBlock Text="Manage and update your private server components" Foreground="#AAA" Margin="0,0,0,30" FontSize="14"/>
-
-                            <!-- === Private Server (PS) Card === -->
                             <Border Background="#E60D0B1E" CornerRadius="18" Padding="25" Margin="0,0,0,20">
-                                <Border.Effect><DropShadowEffect BlurRadius="15" Color="Black" Opacity="0.2" ShadowDepth="0"/></Border.Effect>
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                            <Border Width="4" Height="16" CornerRadius="2" Background="#C75CFF" Margin="0,0,10,0"/>
-                                            <TextBlock Text="PRIVATE SERVER" Foreground="White" FontSize="18" FontWeight="Black" VerticalAlignment="Center" />
-                                        </StackPanel>
+                                        <TextBlock Text="PRIVATE SERVER" Foreground="White" FontSize="18" FontWeight="Black"/>
                                         <TextBlock Text="firefly-go_win.exe" Foreground="#888" FontSize="12"/>
-                                        <TextBlock x:Name="TxtPSStatus" Text="Ready to check updates" Foreground="#00E5FF" FontSize="12" Margin="0,8,0,0" FontWeight="Bold"/>
+                                        <TextBlock x:Name="TxtPSStatus" Text="Ready" Foreground="#FFD700" FontSize="12" Margin="0,8,0,0" FontWeight="Bold"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
-                                        <Button x:Name="BtnOpenServerFolder" Content="&#xE838;" FontFamily="Segoe Fluent Icons" ToolTip="Open folder"
-                                                Width="45" Height="45" Margin="0,0,12,0" Background="#1AFFFFFF" Foreground="#AAA"
-                                                BorderThickness="1" BorderBrush="#33FFFFFF" Click="BtnOpenServerFolder_Click">
+                                        <Button x:Name="BtnOpenServerFolder" Content="&#xE838;" FontFamily="Segoe Fluent Icons" Width="42" Height="42" Margin="0,0,10,0" Background="#1AFFFFFF" Foreground="#AAA" BorderThickness="0" Click="BtnOpenServerFolder_Click">
                                             <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
                                         </Button>
-                                        <Button x:Name="BtnUpdatePS" Content="UPDATE" Background="#C75CFF" Foreground="White" FontWeight="Bold"
-                                                Padding="25,10" BorderThickness="0" Click="BtnUpdatePS_Click">
+                                        <Button x:Name="BtnInstallPSFromFile" Content="INSTALL FILE" Background="#555555" Foreground="White" FontWeight="Bold" Padding="16,10" BorderThickness="0" FontSize="11" Margin="0,0,10,0" Click="BtnInstallPSFromFile_Click">
                                             <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
-                                            <Button.Effect><DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="#C75CFF" Opacity="0.4"/></Button.Effect>
+                                        </Button>
+                                        <Button x:Name="BtnUpdatePS" Content="UPDATE" Background="#FFD700" Foreground="#1A1A1A" FontWeight="Bold" Padding="22,10" BorderThickness="0" Click="BtnUpdatePS_Click">
+                                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
                                         </Button>
                                     </StackPanel>
                                 </Grid>
                             </Border>
-
-                            <!-- === Proxy Card === -->
-                            <Border Background="#E60D0B1E" CornerRadius="18" Padding="25" Margin="0,0,0,30">
-                                <Border.Effect><DropShadowEffect BlurRadius="15" Color="Black" Opacity="0.2" ShadowDepth="0"/></Border.Effect>
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <Border Background="#E60D0B1E" CornerRadius="18" Padding="25" Margin="0,0,0,20">
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                            <Border Width="4" Height="16" CornerRadius="2" Background="#00E5FF" Margin="0,0,10,0"/>
-                                            <TextBlock Text="PROXY" Foreground="White" FontSize="18" FontWeight="Black" VerticalAlignment="Center" />
-                                        </StackPanel>
+                                        <TextBlock Text="PROXY" Foreground="White" FontSize="18" FontWeight="Black"/>
                                         <TextBlock Text="firefly-go-proxy.exe" Foreground="#888" FontSize="12"/>
-                                        <TextBlock x:Name="TxtProxyStatus" Text="Connection bridge" Foreground="#00E5FF" FontSize="12" Margin="0,8,0,0" FontWeight="Bold"/>
+                                        <TextBlock x:Name="TxtProxyStatus" Text="Connection bridge" Foreground="#FFD700" FontSize="12" Margin="0,8,0,0" FontWeight="Bold"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
-                                        <Button x:Name="BtnOpenProxyFolder" Content="&#xE838;" FontFamily="Segoe Fluent Icons" ToolTip="Open folder"
-                                                Width="45" Height="45" Margin="0,0,12,0" Background="#1AFFFFFF" Foreground="#AAA"
-                                                BorderThickness="1" BorderBrush="#33FFFFFF" Click="BtnOpenProxyFolder_Click">
+                                        <Button x:Name="BtnOpenProxyFolder" Content="&#xE838;" FontFamily="Segoe Fluent Icons" Width="42" Height="42" Margin="0,0,10,0" Background="#1AFFFFFF" Foreground="#AAA" BorderThickness="0" Click="BtnOpenProxyFolder_Click">
                                             <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
                                         </Button>
-                                        <Button x:Name="BtnUpdateProxy" Content="DOWNLOAD" Background="#00BCD4" Foreground="White" FontWeight="Bold"
-                                                Padding="25,10" BorderThickness="0" Click="BtnUpdateProxy_Click">
+                                        <Button x:Name="BtnInstallProxyFromFile" Content="INSTALL FILE" Background="#555555" Foreground="White" FontWeight="Bold" Padding="16,10" BorderThickness="0" FontSize="11" Margin="0,0,10,0" Click="BtnInstallProxyFromFile_Click">
                                             <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
-                                            <Button.Effect><DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="#00E5FF" Opacity="0.4"/></Button.Effect>
+                                        </Button>
+                                        <Button x:Name="BtnUpdateProxy" Content="DOWNLOAD" Background="#00BCD4" Foreground="White" FontWeight="Bold" Padding="22,10" BorderThickness="0" Click="BtnUpdateProxy_Click">
+                                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
                                         </Button>
                                     </StackPanel>
                                 </Grid>
                             </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
 
-                            <Border Background="#1A111111" CornerRadius="14" Padding="25" BorderThickness="1" BorderBrush="#1AFFFFFF">
+                <!-- LANGUAGE -->
+                <Grid x:Name="PanelLanguage" Visibility="Hidden">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="40">
+                        <StackPanel>
+                            <TextBlock Text="LANGUAGE" Foreground="#FFD700" FontSize="28" FontWeight="Black" Margin="0,0,0,25"/>
+                            <Border Background="#E60D0B1E" CornerRadius="16" Padding="28" Margin="0,0,0,16">
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="200"/></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Launcher Language" Foreground="White" FontSize="16" FontWeight="Bold"/><TextBlock Text="Changes the text in this launcher" Foreground="#888" FontSize="12" Margin="0,4,0,0"/></StackPanel>
+                                    <ComboBox x:Name="CmbLauncherLang" Grid.Column="1" Height="36" SelectionChanged="CmbLauncherLang_SelectionChanged" Background="#1AFFFFFF">
+                                        <ComboBoxItem Content="English" Tag="en" IsSelected="True"/><ComboBoxItem Content="ไทย" Tag="th"/><ComboBoxItem Content="简体中文" Tag="zh"/><ComboBoxItem Content="Русский" Tag="ru"/>
+                                    </ComboBox>
+                                </Grid>
+                            </Border>
+                            <Border Background="#E60D0B1E" CornerRadius="16" Padding="28" Margin="0,0,0,16">
                                 <StackPanel>
-                                    <TextBlock Text="Tip: The proxy and server are automatically launched when you start the game." Foreground="#FFD600" FontSize="13" FontWeight="Bold" Margin="0,0,0,5"/>
-                                    <TextBlock Text="Make sure no other software is using ports 443 or 8080." Foreground="#AAA" FontSize="11"/>
+                                    <TextBlock Text="In-Game Localization" Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,0,16"/>
+                                    <Grid Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="200"/></Grid.ColumnDefinitions>
+                                        <TextBlock Text="Text Language" Foreground="#888" VerticalAlignment="Center"/>
+                                        <ComboBox x:Name="CmbTextLang" Grid.Column="1" Height="32"><ComboBoxItem Content="English" Tag="en" IsSelected="True"/><ComboBoxItem Content="Chinese" Tag="cn"/><ComboBoxItem Content="Japanese" Tag="jp"/></ComboBox>
+                                    </Grid>
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="200"/></Grid.ColumnDefinitions>
+                                        <TextBlock Text="Voice Language" Foreground="#888" VerticalAlignment="Center"/>
+                                        <ComboBox x:Name="CmbVoiceLang" Grid.Column="1" Height="32"><ComboBoxItem Content="English" Tag="en"/><ComboBoxItem Content="Japanese" Tag="jp" IsSelected="True"/></ComboBox>
+                                    </Grid>
+                                    <Button Content="APPLY TO GAME" Margin="0,20,0,0" Width="200" HorizontalAlignment="Left" Background="#FFD700" Foreground="#1A1A1A" FontWeight="Bold" Height="40" Click="BtnApplyLanguage_Click">
+                                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
+                                    </Button>
+                                    <TextBlock x:Name="TxtLangStatus" Text="" Foreground="#FFD700" Margin="0,12,0,0" FontSize="12" FontWeight="Bold"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
-                
-                <!-- Unified Language & Localization (HSR STYLE) -->
-                <Grid x:Name="PanelLanguage" Visibility="Hidden">
-                    <Grid Margin="40">
-                        <TextBlock Text="LANGUAGE" Foreground="#C75CFF" FontSize="32" FontWeight="Black" Margin="0,0,0,40">
-                             <TextBlock.Effect><DropShadowEffect BlurRadius="15" Color="#C75CFF" Opacity="0.4" ShadowDepth="0"/></TextBlock.Effect>
-                        </TextBlock>
-                        
-                        <ScrollViewer Margin="0,60,0,0">
-                            <StackPanel>
-                                <!-- Launcher Language -->
-                                <Border Background="#E60D0B1E" CornerRadius="20" Padding="30" Margin="0,0,0,20">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="200"/></Grid.ColumnDefinitions>
-                                        <StackPanel>
-                                            <TextBlock Text="Launcher Language" Foreground="White" FontSize="18" FontWeight="Bold"/>
-                                            <TextBlock Text="Changes the text in this launcher" Foreground="#888" FontSize="13" Margin="0,4,0,0"/>
-                                        </StackPanel>
-                                        <ComboBox x:Name="CmbLauncherLang" Grid.Column="1" Height="40" SelectionChanged="CmbLauncherLang_SelectionChanged" Background="#1AFFFFFF">
-                                            <ComboBoxItem Content="English" Tag="en" IsSelected="True"/><ComboBoxItem Content="ไทย" Tag="th"/><ComboBoxItem Content="简体中文" Tag="zh"/><ComboBoxItem Content="Русский" Tag="ru"/>
-                                        </ComboBox>
-                                    </Grid>
-                                </Border>
 
-                                <!-- Game Localization (Optional/In-Game) -->
-                                <Border Background="#E60D0B1E" CornerRadius="20" Padding="30" Margin="0,0,0,20">
-                                    <StackPanel>
-                                        <TextBlock Text="In-Game Localization" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
-                                        <Grid Margin="0,0,0,15">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="200"/></Grid.ColumnDefinitions>
-                                            <TextBlock Text="Text Language" Foreground="#888" VerticalAlignment="Center"/>
-                                            <ComboBox x:Name="CmbTextLang" Grid.Column="1" Height="35">
-                                                <ComboBoxItem Content="English" Tag="en" IsSelected="True"/><ComboBoxItem Content="Chinese" Tag="cn"/><ComboBoxItem Content="Japanese" Tag="jp"/>
-                                            </ComboBox>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="200"/></Grid.ColumnDefinitions>
-                                            <TextBlock Text="Voice Language" Foreground="#888" VerticalAlignment="Center"/>
-                                            <ComboBox x:Name="CmbVoiceLang" Grid.Column="1" Height="35">
-                                                <ComboBoxItem Content="English" Tag="en"/><ComboBoxItem Content="Japanese" Tag="jp" IsSelected="True"/>
-                                            </ComboBox>
-                                        </Grid>
-                                        <Button Content="APPLY TO GAME" Margin="0,25,0,0" Width="200" HorizontalAlignment="Left" Background="#C75CFF" Foreground="White" FontWeight="Bold" Height="45" Click="BtnApplyLanguage_Click">
-                                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="10"/></Style></Button.Resources>
-                                        </Button>
-                                        <TextBlock x:Name="TxtLangStatus" Text="" Foreground="#00E5FF" Margin="0,15,0,0" FontSize="12" FontWeight="Bold"/>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-                        </ScrollViewer>
-                    </Grid>
-                </Grid>
-
-                <!-- SR Tools (Full Screen) -->
+                <!-- SR TOOLS -->
                 <Grid x:Name="PanelSRTools" Visibility="Hidden" ClipToBounds="True">
-                    <wv2:WebView2 x:Name="WebViewSRTools" Source="https://srtools.neonteam.dev/"
-                                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                                 CoreWebView2InitializationCompleted="WebViewSRTools_InitializationCompleted"/>
+                    <wv2:WebView2 x:Name="WebViewSRTools" Source="https://srtools.neonteam.dev/" CoreWebView2InitializationCompleted="WebViewSRTools_InitializationCompleted"/>
                 </Grid>
 
-                <!-- Guides (HSR STYLE) -->
-                <Grid x:Name="PanelTutorials" Visibility="Hidden">
-                    <Grid Margin="40">
-                        <TextBlock Text="GUIDES" Foreground="#C75CFF" FontSize="32" FontWeight="Black" Margin="0,0,0,40">
-                             <TextBlock.Effect><DropShadowEffect BlurRadius="15" Color="#C75CFF" Opacity="0.4" ShadowDepth="0"/></TextBlock.Effect>
-                        </TextBlock>
-                        <Border Background="#E60D0B1E" Margin="0,60,0,0" CornerRadius="20" ClipToBounds="True" BorderThickness="1" BorderBrush="#33FFFFFF">
-                            <wv2:WebView2 x:Name="WebViewTutorials" Source="https://www.youtube.com/embed/tk48rZRFwno" CoreWebView2InitializationCompleted="WebViewTutorials_InitializationCompleted"/>
-                        </Border>
-                    </Grid>
-                </Grid>
-
-                <!-- Settings (HSR STYLE) -->
+                <!-- SETTINGS (Firefly Style) -->
                 <Grid x:Name="PanelSettings" Visibility="Hidden">
-                    <Grid Margin="40">
-                        <TextBlock Text="SETTINGS" Foreground="#C75CFF" FontSize="32" FontWeight="Black" Margin="0,0,0,40">
-                             <TextBlock.Effect><DropShadowEffect BlurRadius="15" Color="#C75CFF" Opacity="0.4" ShadowDepth="0"/></TextBlock.Effect>
-                        </TextBlock>
-                        
-                        <StackPanel Margin="0,60,0,0">
-                            <Border Background="#E60D0B1E" CornerRadius="20" Padding="30" Margin="0,0,0,20">
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Auto-Launch Services" Foreground="White" FontSize="18" FontWeight="Bold"/>
-                                        <TextBlock Text="Launch Proxy and PS automatically with game" Foreground="#888" FontSize="13" Margin="0,4,0,0"/>
-                                    </StackPanel>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="40">
+                        <StackPanel>
+                            <TextBlock Text="Settings" Foreground="#FFD700" FontSize="28" FontWeight="Black" Margin="0,0,0,25"/>
+                            <Border Background="#E60D0B1E" CornerRadius="16" Padding="25" Margin="0,0,0,14" BorderThickness="1" BorderBrush="#22FFFFFF">
+                                <StackPanel>
+                                    <TextBlock Text="Launcher Update" Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,0,6"/>
+                                    <TextBlock Text="Check if your launcher is up to date." Foreground="#888" FontSize="12" Margin="0,0,0,12"/>
+                                    <Button x:Name="BtnCheckLauncherUpdate" Content="Check for Launcher Updates" Padding="18,9" HorizontalAlignment="Left" Foreground="White" FontWeight="Bold" FontSize="12" BorderThickness="0" Click="BtnCheckLauncherUpdate_Click" Cursor="Hand">
+                                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style></Button.Resources>
+                                        <Button.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#FF6B4A" Offset="0"/><GradientStop Color="#FF8855" Offset="1"/></LinearGradientBrush></Button.Background>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="#E60D0B1E" CornerRadius="16" Padding="25" Margin="0,0,0,14" BorderThickness="1" BorderBrush="#22FFFFFF">
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Auto-Launch Services" Foreground="White" FontSize="16" FontWeight="Bold"/><TextBlock Text="Launch Proxy and PS automatically with game" Foreground="#888" FontSize="12" Margin="0,4,0,0"/></StackPanel>
                                     <CheckBox x:Name="ChkAutoServices" Grid.Column="1" IsChecked="True" Style="{StaticResource ModernCheckBox}" Checked="ChkAutoServices_Checked" Unchecked="ChkAutoServices_Unchecked"/>
                                 </Grid>
                             </Border>
-                            <Border Background="#E60D0B1E" CornerRadius="20" Padding="30" Margin="0,0,0,20">
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Minimize to Tray" Foreground="White" FontSize="18" FontWeight="Bold"/>
-                                        <TextBlock Text="Hide to system tray instead of taskbar" Foreground="#888" FontSize="13" Margin="0,4,0,0"/>
-                                    </StackPanel>
+                            <Border Background="#E60D0B1E" CornerRadius="16" Padding="25" Margin="0,0,0,14" BorderThickness="1" BorderBrush="#22FFFFFF">
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Closing Options" Foreground="White" FontSize="16" FontWeight="Bold"/><TextBlock Text="Minimize to tray instead of closing" Foreground="#888" FontSize="12" Margin="0,4,0,0"/></StackPanel>
                                     <CheckBox x:Name="ChkMinimizeToTray" Grid.Column="1" IsChecked="False" Style="{StaticResource ModernCheckBox}" Checked="ChkMinimizeToTray_Checked" Unchecked="ChkMinimizeToTray_Unchecked"/>
                                 </Grid>
                             </Border>
+                            <Border Background="#E60D0B1E" CornerRadius="16" Padding="25" Margin="0,0,0,14" BorderThickness="1" BorderBrush="#22FFFFFF">
+                                <StackPanel><TextBlock Text="Version" Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="TxtVersionInfo" Text="Server: --  Proxy: --  Launcher: 1.0.0" Foreground="#FFD700" FontSize="13" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
-                    </Grid>
+                    </ScrollViewer>
                 </Grid>
 
-                <!-- Information (HSR STYLE) -->
+                <!-- INFO / ABOUT -->
                 <Grid x:Name="PanelInfo" Visibility="Hidden">
-                    <Grid Margin="40">
-                        <TextBlock Text="INFORMATION" Foreground="#C75CFF" FontSize="32" FontWeight="Black" Margin="0,0,0,40">
-                             <TextBlock.Effect><DropShadowEffect BlurRadius="15" Color="#C75CFF" Opacity="0.4" ShadowDepth="0"/></TextBlock.Effect>
-                        </TextBlock>
-                        
-                        <ScrollViewer Margin="0,60,0,0">
-                            <StackPanel>
-                                <Border Background="#E60D0B1E" CornerRadius="20" Padding="35" Margin="0,0,0,20">
-                                    <StackPanel>
-                                        <TextBlock Text="SILVERWOLF LAUNCHER" Foreground="#00E5FF" FontSize="20" FontWeight="Black" Margin="0,0,0,10"/>
-                                        <TextBlock Text="A modern, high-performance launcher for private server management." Foreground="#AAA" TextWrapping="Wrap" LineHeight="20"/>
-                                        <Separator Background="#33FFFFFF" Margin="0,20"/>
-                                        <TextBlock Text="Credits:" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
-                                        <TextBlock Text="• UI/UX Design inspired by Honkai: Star Rail Mobile" Foreground="#888" Margin="0,2"/>
-                                        <TextBlock Text="• Developed by xeroxua &amp; deepmind" Foreground="#888" Margin="0,2"/>
-                                        <TextBlock Text="• Asset by NeonTeam" Foreground="#888" Margin="0,2"/>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-                        </ScrollViewer>
-                    </Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="40">
+                        <StackPanel>
+                            <TextBlock Text="ABOUT" Foreground="#FFD700" FontSize="28" FontWeight="Black" Margin="0,0,0,25"/>
+                            <Border Background="#E60D0B1E" CornerRadius="16" Padding="30">
+                                <StackPanel>
+                                    <TextBlock Text="SILVERWOLF LAUNCHER" Foreground="#FFD700" FontSize="20" FontWeight="Black" Margin="0,0,0,10"/>
+                                    <TextBlock Text="A modern, high-performance launcher for private server management." Foreground="#AAA" TextWrapping="Wrap" LineHeight="20"/>
+                                    <Separator Background="#33FFFFFF" Margin="0,20"/>
+                                    <TextBlock Text="Credits:" Foreground="White" FontWeight="Bold" Margin="0,0,0,8"/>
+                                    <TextBlock Text="Developed by xeroxua" Foreground="#888" Margin="0,2"/>
+                                    <TextBlock Text="Asset by NeonTeam" Foreground="#888" Margin="0,2"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
                 </Grid>
             </Grid>
         </Grid>
 
-        <!-- Global Status / Download Overlay -->
-        <Grid x:Name="GridStatus" VerticalAlignment="Bottom" Background="#F2120A2B" Height="80" Visibility="Collapsed" Panel.ZIndex="5000">
-            <Grid Margin="40,0">
+        <!-- ═══ Global Download Status Bar ═══ -->
+        <Grid x:Name="GridStatus" VerticalAlignment="Bottom" Background="#F2111118" Height="70" Visibility="Collapsed" Panel.ZIndex="5000">
+            <Grid Margin="100,0,40,0">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock x:Name="TxtGlobalStatus" Text="DOWNLOADING ASSETS..." Foreground="White" FontSize="14" FontWeight="Bold"/>
-                    <ProgressBar x:Name="ProgGlobal" Height="6" Margin="0,8,0,0" Background="#E6120A2B" Foreground="#00E5FF" BorderThickness="0"/>
+                    <TextBlock x:Name="TxtGlobalStatus" Text="DOWNLOADING..." Foreground="White" FontSize="14" FontWeight="Bold"/>
+                    <ProgressBar x:Name="ProgGlobal" Style="{StaticResource RoundedProgressBarStyle}" Height="6" Margin="0,10,0,0" Background="#33FFFFFF" Foreground="#FFD700" />
                 </StackPanel>
-                <TextBlock x:Name="TxtGlobalPercent" Grid.Column="1" Text="0%" Foreground="#00E5FF" FontSize="20" FontWeight="Black" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                <TextBlock x:Name="TxtGlobalPercent" Grid.Column="1" Text="0%" Foreground="#FFD700" FontSize="18" FontWeight="Black" VerticalAlignment="Center" Margin="20,0,0,0"/>
             </Grid>
         </Grid>
-        
-        <!-- Modern Prompt Overlay -->
-        <Grid x:Name="GridPrompt" Visibility="Collapsed" Panel.ZIndex="9999" Background="#AA000000">
-            <Border Background="#FF1E1E24" Width="460" VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="15" BorderThickness="1" BorderBrush="#33FFFFFF">
-                <StackPanel Margin="30">
-                    <!-- Header -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                        <Image Source="pack://application:,,,/Assets/SilverWolficon.png" Width="20" Height="20" Margin="0,0,12,0" VerticalAlignment="Center">
-                            <Image.Effect>
-                                <DropShadowEffect BlurRadius="5" ShadowDepth="0" Color="#C75CFF" Opacity="0.5"/>
-                            </Image.Effect>
-                        </Image>
-                        <TextBlock x:Name="TxtPromptTitle" Text="SILVERWOLF LAUNCHER" Foreground="#E2D4FF" FontSize="16" FontWeight="Black" VerticalAlignment="Center"/>
-                    </StackPanel>
-                    
-                    <Border Height="1" Background="#22FFFFFF" Margin="0,0,0,20"/>
-                    
-                    <TextBlock x:Name="TxtPromptMessage" Text="..." Foreground="#AAA" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,25" LineHeight="20"/>
-                    
-                    <!-- Don't show again (hidden by default) -->
-                    <CheckBox x:Name="ChkDontShowAgain" Content="{DynamicResource L_DontShowAgain}" Foreground="#BBB" FontSize="12" Margin="0,0,0,20" Visibility="Collapsed" Cursor="Hand">
-                        <CheckBox.Resources>
-                            <Style TargetType="CheckBox">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="CheckBox">
-                                            <StackPanel Orientation="Horizontal">
-                                                <Border x:Name="chkBox" Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="#555" Background="Transparent" Margin="0,0,8,0">
-                                                    <TextBlock x:Name="chkMark" Text="✓" Foreground="#C75CFF" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
-                                                </Border>
-                                                <ContentPresenter VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsChecked" Value="True">
-                                                    <Setter TargetName="chkBox" Property="BorderBrush" Value="#C75CFF"/>
-                                                    <Setter TargetName="chkMark" Property="Visibility" Value="Visible"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </CheckBox.Resources>
-                    </CheckBox>
-                    
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="BtnPromptCancel" Content="LATER" Background="#22FFFFFF" Foreground="White" FontWeight="Bold" Padding="20,10" Margin="0,0,15,0" BorderThickness="0" Click="BtnPromptCancel_Click">
-                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
-                        </Button>
-                        <Button x:Name="BtnPromptOk" Content="OK" Background="#C75CFF" Foreground="White" FontWeight="Bold" Padding="28,10" BorderThickness="0" Click="BtnPromptOk_Click">
-                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
-                            <Button.Effect>
-                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#C75CFF" Opacity="0.5"/>
-                            </Button.Effect>
-                        </Button>
-                    </StackPanel>
+
+        <!-- ═══ Prompt Dialog (Endfield/Firefly Style) ═══ -->
+        <Grid x:Name="GridPrompt" Visibility="Collapsed" Panel.ZIndex="9999" Background="#88000000">
+            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="12" ClipToBounds="True">
+                <Border.Effect><DropShadowEffect BlurRadius="30" ShadowDepth="6" Color="Black" Opacity="0.6"/></Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="3"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Border>
+                        <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#FF6B8A" Offset="0"/><GradientStop Color="#FFD700" Offset="1"/></LinearGradientBrush></Border.Background>
+                    </Border>
+                    <Border Grid.Row="1" Background="#FF1C1B2E" Padding="28,18,28,22">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <TextBlock x:Name="TxtPromptTitle" Text="Update Data" Foreground="#FF6B8A" FontSize="19" FontWeight="Black"/>
+                                <Button Content="&#xE711;" FontFamily="Segoe Fluent Icons" Width="30" Height="30" HorizontalAlignment="Right" Background="#FFFF4060" Foreground="White" FontSize="11" BorderThickness="0" Click="BtnPromptClose_Click" Cursor="Hand">
+                                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="15"/></Style></Button.Resources>
+                                </Button>
+                            </Grid>
+                            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#44FF6B8A" Offset="0"/><GradientStop Color="#44FFD700" Offset="1"/></LinearGradientBrush></Border.Background></Border>
+                            <TextBlock x:Name="TxtPromptMessage" Text="..." Foreground="#CCC" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,22" LineHeight="20"/>
+                            <CheckBox x:Name="ChkDontShowAgain" Content="{DynamicResource L_DontShowAgain}" Foreground="#BBB" FontSize="11" Margin="0,0,0,16" Visibility="Collapsed" Cursor="Hand"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button x:Name="BtnPromptCancel" Content="No" Width="76" Height="36" Background="Transparent" Foreground="#FF6B8A" FontWeight="Bold" FontSize="13" BorderThickness="2" BorderBrush="#FF6B8A" Margin="0,0,10,0" Click="BtnPromptCancel_Click" Cursor="Hand">
+                                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
+                                </Button>
+                                <Button x:Name="BtnPromptOk" Content="Yes" Width="76" Height="36" Foreground="White" FontWeight="Bold" FontSize="13" BorderThickness="0" Click="BtnPromptOk_Click" Cursor="Hand">
+                                    <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
+                                    <Button.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#FF6B8A" Offset="0"/><GradientStop Color="#FF8866" Offset="1"/></LinearGradientBrush></Button.Background>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ═══ Hamburger Flyout Menu ═══ -->
+        <Grid x:Name="GridHamburgerOverlay" Visibility="Collapsed" Panel.ZIndex="8000" Background="Transparent" MouseLeftButtonDown="GridHamburgerOverlay_MouseDown">
+            <Border Background="#EE1A1A28" Width="240" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,30,90" CornerRadius="10" BorderThickness="1" BorderBrush="#33FFFFFF">
+                <Border.Effect><DropShadowEffect BlurRadius="20" ShadowDepth="4" Color="Black" Opacity="0.5"/></Border.Effect>
+                <StackPanel Margin="6,8">
+                    <Button Content="Change Game Path" FontSize="14" FontWeight="SemiBold" Foreground="White" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="14,10" Cursor="Hand" Click="BtnMenuChangePath_Click">
+                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
+                    </Button>
+                    <Button Content="Check for Updates&#x0a;Server &amp; Proxy" FontSize="14" FontWeight="SemiBold" Foreground="White" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="14,10" Cursor="Hand" Click="BtnMenuCheckUpdates_Click">
+                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
+                    </Button>
+                    <Border Height="1" Background="#33FFFFFF" Margin="12,5"/>
+                    <Button Content="Open server folder" FontSize="12" Foreground="#CCFFFFFF" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="14,8" Cursor="Hand" Click="BtnOpenServerFolder_Click">
+                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
+                    </Button>
+                    <Button Content="Open proxy folder" FontSize="12" Foreground="#CCFFFFFF" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="14,8" Cursor="Hand" Click="BtnOpenProxyFolder_Click">
+                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
+                    </Button>
+                    <Button Content="Open voice folder" FontSize="12" Foreground="#CCFFFFFF" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="14,8" Cursor="Hand" Click="BtnOpenVoiceFolder_Click">
+                        <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
+                    </Button>
                 </StackPanel>
             </Border>
         </Grid>

@@ -37,6 +37,10 @@ namespace SilverWolfLauncher
         private Forms.NotifyIcon? notifyIcon;
         private System.Windows.Threading.DispatcherTimer? watchdogTimer;
         
+        private string serverVersion = "0.0.0";
+        private string proxyVersion = "0.0.0";
+        private bool isInitializingUI = false;
+        
         // Process Tracking
         private Process? gameProcess;
         private Process? psProcess;
@@ -53,6 +57,7 @@ namespace SilverWolfLauncher
             SetupNotifyIcon();
             SetupWatchdog();
             LoadConfig();
+            StartBackgroundVideo();
             InitializeAsync();
         }
 
@@ -101,114 +106,206 @@ namespace SilverWolfLauncher
         {
             try {
                 await WebViewSRTools.EnsureCoreWebView2Async(null);
-                await WebViewTutorials.EnsureCoreWebView2Async(null);
             } catch { /* WebView might not be ready yet */ }
             
-        if (!string.IsNullOrEmpty(gameExecutablePath))
-        {
-            await CheckAndPromptPSInstallation();
-        }
-    }
-
-    private void SetupWatchdog()
-    {
-        watchdogTimer = new System.Windows.Threading.DispatcherTimer();
-        watchdogTimer.Interval = TimeSpan.FromSeconds(5);
-        watchdogTimer.Tick += (s, e) => {
-            if (gameProcess == null || gameProcess.HasExited)
+            if (!string.IsNullOrEmpty(gameExecutablePath))
             {
-                StopWatchdog();
-                return;
+                await CheckAndPromptPSInstallation();
             }
 
-            // Ensure dependencies are running
-            if (psProcess == null || psProcess.HasExited) LaunchPS();
-            if (proxyProcess == null || proxyProcess.HasExited) LaunchProxy();
-        };
-    }
+            // Load version info for Settings panel
+            LoadVersionInfo();
 
-    private void StartWatchdog()
-    {
-        if (watchdogTimer != null) watchdogTimer.Start();
-        TxtGlobalStatus.Text = "GAME IS RUNNING — WATCHDOG ACTIVE";
-        GridStatus.Visibility = Visibility.Visible;
-        ProgGlobal.IsIndeterminate = true;
-        if (notifyIcon != null) notifyIcon.Text = "SilverWolf Launcher (Game Running)";
-    }
+            // Update check moved to hamburger menu → "Check for Updates Server & Proxy"
+        }
 
-    private void StopWatchdog()
-    {
-        if (watchdogTimer != null) watchdogTimer.Stop();
-        GridStatus.Visibility = Visibility.Collapsed;
-        ProgGlobal.IsIndeterminate = false;
-        gameProcess = null;
-        if (notifyIcon != null) notifyIcon.Text = "SilverWolf Launcher";
-    }
+        private const string CurrentLauncherVersion = "1.2.0";
+        private const string LauncherGitUrl = "https://git.kain.io.vn/api/v1/repos/Firefly-Shelter/Firefly_Launcher/releases";
 
-
-    private void LaunchPS()
-    {
-        if (psProcess != null && !psProcess.HasExited) return;
-
-        string gameDir = !string.IsNullOrEmpty(gameExecutablePath) ? Path.GetDirectoryName(gameExecutablePath) ?? "" : "";
-        string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
-
-        string[] psSearchPaths = {
-            Path.Combine(launcherDir, "server", "firefly-go_win.exe"),
-            Path.Combine(gameDir, "server", "firefly-go_win.exe"),
-            Path.Combine(gameDir, "firefly-go_win.exe"),
-        };
-
-        foreach (var psPath in psSearchPaths)
+        private void LoadVersionInfo()
         {
-            if (File.Exists(psPath))
+            string sVer = serverVersion == "0.0.0" ? "Not Installed" : serverVersion;
+            string pVer = proxyVersion == "0.0.0" ? "Not Installed" : proxyVersion;
+
+            string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
+            if (serverVersion == "0.0.0" && File.Exists(Path.Combine(launcherDir, "server", "firefly-go_win.exe")))
+                sVer = "Unknown (Update required)";
+            if (proxyVersion == "0.0.0" && File.Exists(Path.Combine(launcherDir, "proxy", "firefly-go-proxy.exe")))
+                pVer = "Unknown (Update required)";
+
+            TxtVersionInfo.Text = $"Server: {sVer}  Proxy: {pVer}  Launcher: {CurrentLauncherVersion}";
+        }
+
+        // Removed legacy ReadVersionFile
+        private async void BtnCheckLauncherUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            BtnCheckLauncherUpdate.IsEnabled = false;
+            var originalContent = BtnCheckLauncherUpdate.Content;
+            BtnCheckLauncherUpdate.Content = "Checking...";
+            
+            try
             {
-                try
+                // The instruction refers to UpdateService.cs for CancellationTokenSource,
+                // but the snippet is for MainWindow.xaml.cs.
+                // Assuming the intent is to increase the HttpClient timeout here.
+                using var client = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(20) };
+                client.DefaultRequestHeaders.Add("User-Agent", "SilverWolf-Launcher");
+                var json = await client.GetStringAsync(LauncherGitUrl);
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                if (root.ValueKind == JsonValueKind.Array && root.GetArrayLength() > 0)
                 {
-                    var psi = new ProcessStartInfo(psPath) { WorkingDirectory = Path.GetDirectoryName(psPath), UseShellExecute = false, CreateNoWindow = false };
-                    psProcess = Process.Start(psi);
-                } catch { }
-                break;
+                    string latest = root[0].GetProperty("tag_name").GetString() ?? "";
+                    if (!string.IsNullOrEmpty(latest) && latest != CurrentLauncherVersion)
+                    {
+                        ShowPrompt("LAUNCHER UPDATE", $"A new version of the launcher is available ({latest}).\nWould you like to visit the release page and download it?",
+                            () => Process.Start(new ProcessStartInfo("https://github.com/xeroxua/SilverWolfLauncher/releases") { UseShellExecute = true }),
+                            "Download", "Later");
+                    }
+                    else
+                        ShowInfo("Up to Date", "Your launcher is already the latest version.");
+                }
+                else ShowInfo("Error", "Could not fetch release info.");
             }
-        }
-    }
-
-    private void LaunchProxy()
-    {
-        if (proxyProcess != null && !proxyProcess.HasExited) return;
-
-        string gameDir = !string.IsNullOrEmpty(gameExecutablePath) ? Path.GetDirectoryName(gameExecutablePath) ?? "" : "";
-        string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
-
-        string[] proxySearchPaths = {
-            Path.Combine(launcherDir, "proxy", "firefly-go-proxy.exe"),
-            Path.Combine(gameDir, "proxy", "firefly-go-proxy.exe"),
-            Path.Combine(gameDir, "firefly-go-proxy.exe"),
-        };
-
-        foreach (var proxyPath in proxySearchPaths)
-        {
-            if (File.Exists(proxyPath))
+            catch (Exception ex) { ShowInfo("Error", $"Failed to check: {ex.Message}"); }
+            finally
             {
-                try
-                {
-                    var psi = new ProcessStartInfo(proxyPath) { WorkingDirectory = Path.GetDirectoryName(proxyPath), UseShellExecute = false, CreateNoWindow = false };
-                    proxyProcess = Process.Start(psi);
-                } catch { }
-                break;
+                BtnCheckLauncherUpdate.Content = originalContent;
+                BtnCheckLauncherUpdate.IsEnabled = true;
             }
         }
-    }
 
-    private async Task CheckAndPromptPSInstallation()
+        private void SetupWatchdog()
+        {
+            watchdogTimer = new System.Windows.Threading.DispatcherTimer();
+            watchdogTimer.Interval = TimeSpan.FromSeconds(5);
+            watchdogTimer.Tick += (s, e) => {
+                if (gameProcess == null || gameProcess.HasExited)
+                {
+                    StopWatchdog();
+                    return;
+                }
+
+                // Ensure dependencies are running
+                if (psProcess == null || psProcess.HasExited) LaunchPS();
+                if (proxyProcess == null || proxyProcess.HasExited) LaunchProxy();
+            };
+        }
+
+        private void StartWatchdog()
+        {
+            if (watchdogTimer != null) watchdogTimer.Start();
+            TxtGlobalStatus.Text = "GAME IS RUNNING — WATCHDOG ACTIVE";
+            GridStatus.Visibility = Visibility.Visible;
+            ProgGlobal.IsIndeterminate = true;
+            if (notifyIcon != null) notifyIcon.Text = "SilverWolf Launcher (Game Running)";
+        }
+
+        private void StopWatchdog()
+        {
+            if (watchdogTimer != null) watchdogTimer.Stop();
+            GridStatus.Visibility = Visibility.Collapsed;
+            ProgGlobal.IsIndeterminate = false;
+            gameProcess = null;
+            if (notifyIcon != null) notifyIcon.Text = "SilverWolf Launcher";
+        }
+
+
+        private void LaunchPS()
+        {
+            if (psProcess != null && !psProcess.HasExited) return;
+
+            string gameDir = !string.IsNullOrEmpty(gameExecutablePath) ? Path.GetDirectoryName(gameExecutablePath) ?? "" : "";
+            string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
+
+            string[] psSearchPaths = {
+                Path.Combine(launcherDir, "server", "firefly-go_win.exe"),
+                Path.Combine(gameDir, "server", "firefly-go_win.exe"),
+                Path.Combine(gameDir, "firefly-go_win.exe"),
+            };
+
+            foreach (var psPath in psSearchPaths)
+            {
+                if (File.Exists(psPath))
+                {
+                    try
+                    {
+                        var psi = new ProcessStartInfo(psPath) { WorkingDirectory = Path.GetDirectoryName(psPath), UseShellExecute = false, CreateNoWindow = false };
+                        psProcess = Process.Start(psi);
+                    } catch { }
+                    break;
+                }
+            }
+        }
+
+        private void LaunchProxy()
+        {
+            if (proxyProcess != null && !proxyProcess.HasExited) return;
+
+            string gameDir = !string.IsNullOrEmpty(gameExecutablePath) ? Path.GetDirectoryName(gameExecutablePath) ?? "" : "";
+            string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
+
+            string[] proxySearchPaths = {
+                Path.Combine(launcherDir, "proxy", "firefly-go-proxy.exe"),
+                Path.Combine(gameDir, "proxy", "firefly-go-proxy.exe"),
+                Path.Combine(gameDir, "firefly-go-proxy.exe"),
+            };
+
+            foreach (var proxyPath in proxySearchPaths)
+            {
+                if (File.Exists(proxyPath))
+                {
+                    try
+                    {
+                        var psi = new ProcessStartInfo(proxyPath) { WorkingDirectory = Path.GetDirectoryName(proxyPath), UseShellExecute = false, CreateNoWindow = false };
+                        proxyProcess = Process.Start(psi);
+                    } catch { }
+                    break;
+                }
+            }
+        }
+
+        private async void BtnUpdatePS_Click(object sender, RoutedEventArgs e)
+        {
+            string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
+            BtnUpdatePS.IsEnabled = false;
+            var originalContent = BtnUpdatePS.Content;
+            BtnUpdatePS.Content = "CHECKING...";
+
+            try
+            {
+                var (avail, ver, url) = await updateService.CheckForUpdateAsync(serverVersion);
+                if (avail)
+                {
+                    ShowPrompt("UPDATE PRIVATE SERVER", $"A new Private Server version ({ver}) is available.\nUpdate now?",
+                        async () => {
+                            await PerformPSUpdate(launcherDir, ver, url);
+                        },
+                        "DOWNLOAD", "LATER");
+                }
+                else
+                {
+                    ShowInfo("UP TO DATE", "Private Server is already the latest version.");
+                }
+            }
+            finally
+            {
+                BtnUpdatePS.Content = originalContent;
+                BtnUpdatePS.IsEnabled = true;
+            }
+        }
+        private async Task CheckAndPromptPSInstallation()
         {
             string gameDir = Path.GetDirectoryName(gameExecutablePath) ?? "";
             if (string.IsNullOrEmpty(gameDir)) return;
 
-            string psVersionFile = Path.Combine(gameDir, "ps_version.txt");
-            if (!File.Exists(psVersionFile))
+            string psExe1 = Path.Combine(gameDir, "firefly-go_win.exe");
+            string psExe2 = Path.Combine(gameDir, "server", "firefly-go_win.exe");
+            string launcherPsExe = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "server", "firefly-go_win.exe");
+            
+            if (!File.Exists(psExe1) && !File.Exists(psExe2) && !File.Exists(launcherPsExe))
             {
-                ShowPrompt("INSTALL PRIVATE SERVER", "Private Server (PS) files not found in your game directory. Would you like to install them now?", async () => {
+                ShowPrompt("INSTALL PRIVATE SERVER", "Private Server (PS) files not found in your game directory or launcher. Would you like to install them now?", async () => {
                     await PerformPSUpdate(gameDir);
                 });
             }
@@ -282,10 +379,15 @@ namespace SilverWolfLauncher
             if (BtnPromptCancel.Tag is Action action) action();
         }
 
+        private void BtnPromptClose_Click(object sender, RoutedEventArgs e)
+        {
+            GridPrompt.Visibility = Visibility.Collapsed;
+            RestoreAirspace();
+        }
+
         private void HideAirspace()
         {
             if (PanelSRTools.Visibility == Visibility.Visible) { airspaceHiddenPanel = PanelSRTools; PanelSRTools.Visibility = Visibility.Hidden; }
-            else if (PanelTutorials.Visibility == Visibility.Visible) { airspaceHiddenPanel = PanelTutorials; PanelTutorials.Visibility = Visibility.Hidden; }
         }
 
         private void RestoreAirspace()
@@ -293,8 +395,125 @@ namespace SilverWolfLauncher
             if (airspaceHiddenPanel != null) { airspaceHiddenPanel.Visibility = Visibility.Visible; airspaceHiddenPanel = null; }
         }
 
-        private void OpenDiscord(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("https://discord.gg/QwfTnEdAtN") { UseShellExecute = true });
-        private void OpenGithub(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("https://github.com/xeroxua") { UseShellExecute = true });
+        private void OpenDiscord(object sender, RoutedEventArgs e) { CloseHamburgerMenu(); Process.Start(new ProcessStartInfo("https://discord.gg/QwfTnEdAtN") { UseShellExecute = true }); }
+        private void OpenGithub(object sender, RoutedEventArgs e) { CloseHamburgerMenu(); Process.Start(new ProcessStartInfo("https://github.com/xeroxua") { UseShellExecute = true }); }
+
+        // ── Hamburger Menu ────────────────────────────────────────────────────────
+        private void BtnHamburger_Click(object sender, RoutedEventArgs e)
+        {
+            GridHamburgerOverlay.Visibility = GridHamburgerOverlay.Visibility == Visibility.Visible
+                ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void CloseHamburgerMenu() => GridHamburgerOverlay.Visibility = Visibility.Collapsed;
+
+        private void GridHamburgerOverlay_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            CloseHamburgerMenu();
+        }
+
+        private void BtnMenuChangePath_Click(object sender, RoutedEventArgs e)
+        {
+            CloseHamburgerMenu();
+            BtnBrowseGame_Click(sender, e);
+        }
+
+        private async void BtnMenuCheckUpdates_Click(object sender, RoutedEventArgs e)
+        {
+            CloseHamburgerMenu();
+            await CheckAndPromptServerProxyUpdate();
+        }
+
+        private void BtnOpenVoiceFolder_Click(object sender, RoutedEventArgs e)
+        {
+            CloseHamburgerMenu();
+            string gameDir = !string.IsNullOrEmpty(gameExecutablePath) ? Path.GetDirectoryName(gameExecutablePath) ?? "" : "";
+            if (string.IsNullOrEmpty(gameDir)) { ShowInfo("Error", "Set your game path first."); return; }
+            string voicePath = Path.Combine(gameDir, "StarRail_Data", "Persistent", "Audio", "AudioPackage", "Windows");
+            if (!Directory.Exists(voicePath)) voicePath = Path.Combine(gameDir, "StarRail_Data", "Persistent", "Audio");
+            if (!Directory.Exists(voicePath)) { ShowInfo("Not Found", "Voice folder not found. Make sure the game path is correct."); return; }
+            Process.Start("explorer.exe", voicePath);
+        }
+
+        private async Task CheckAndPromptServerProxyUpdate()
+        {
+            string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
+            
+            GridStatus.Visibility = Visibility.Visible;
+            TxtGlobalStatus.Text = "CHECKING FOR UPDATES...";
+            ProgGlobal.IsIndeterminate = true;
+
+            try
+            {
+                var psTask = updateService.CheckForUpdateAsync(serverVersion);
+                var proxyTask = updateService.CheckProxyUpdateAsync(proxyVersion);
+                await Task.WhenAll(psTask, proxyTask);
+                
+                var (psAvail, psVer, psUrl) = psTask.Result;
+            var (proxyAvail, proxyVer, proxyUrl) = proxyTask.Result;
+
+            if (!psAvail && !proxyAvail)
+            {
+                if (!string.IsNullOrEmpty(updateService.LastErrorMessage))
+                {
+                    ShowInfo("UPDATE FAILED", $"Could not check for updates. Reason:\n{updateService.LastErrorMessage}");
+                }
+                else
+                {
+                    ShowInfo("Up to Date", "Server and Proxy are already up to date.");
+                }
+                return;
+            }
+
+                ShowPrompt("Update Data", "Do you want to update data server and proxy?",
+                    async () => {
+                        if (psAvail) await PerformPSUpdate(launcherDir, psVer, psUrl);
+                        if (proxyAvail) await PerformProxyUpdate(launcherDir, proxyVer, proxyUrl);
+                    },
+                    "Yes", "No");
+            }
+            finally
+            {
+                GridStatus.Visibility = Visibility.Collapsed;
+                ProgGlobal.IsIndeterminate = false;
+                ProgGlobal.Value = 0;
+            }
+        }
+
+        // ── Video Background ─────────────────────────────────────────────────────
+        private void StartBackgroundVideo()
+        {
+            try
+            {
+                string videoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "SilverWolfBG.mp4");
+                if (File.Exists(videoPath))
+                {
+                    BgVideo.Source = new Uri(videoPath, UriKind.Absolute);
+                    BgVideo.Play();
+                }
+            }
+            catch { /* fallback to static image */ }
+        }
+
+        private void BgVideo_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            // Video loaded successfully — hide the static fallback image
+            BgFallbackImage.Visibility = Visibility.Collapsed;
+        }
+
+        private void BgVideo_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            // Loop the video seamlessly
+            BgVideo.Position = TimeSpan.Zero;
+            BgVideo.Play();
+        }
+
+        private void BgVideo_MediaFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            // Video failed — keep static fallback image visible
+            BgFallbackImage.Visibility = Visibility.Visible;
+            BgVideo.Visibility = Visibility.Collapsed;
+        }
 
         private void LoadConfig()
         {
@@ -310,9 +529,16 @@ namespace SilverWolfLauncher
                     using var doc = JsonDocument.Parse(json);
                     var root = doc.RootElement;
                     if (root.TryGetProperty("gamePath",       out var gp))  { gameExecutablePath    = gp.GetString() ?? ""; TxtGamePath.Text = gameExecutablePath; }
-                    if (root.TryGetProperty("minimizeToTray", out var mt))  { minimizeToTrayEnabled = mt.GetBoolean(); ChkMinimizeToTray.IsChecked = minimizeToTrayEnabled; }
+                    if (root.TryGetProperty("minimizeToTray", out var mt))  { 
+                        isInitializingUI = true;
+                        minimizeToTrayEnabled = mt.GetBoolean(); 
+                        ChkMinimizeToTray.IsChecked = minimizeToTrayEnabled; 
+                        isInitializingUI = false;
+                    }
                     if (root.TryGetProperty("dontAskOnClose", out var da))  { dontAskOnClose        = da.GetBoolean(); }
                     if (root.TryGetProperty("autoServices",   out var ast)) { ChkAutoServices.IsChecked    = ast.GetBoolean(); }
+                    if (root.TryGetProperty("serverVersion",  out var sv))  { serverVersion = sv.GetString() ?? "0.0.0"; }
+                    if (root.TryGetProperty("proxyVersion",   out var pv))  { proxyVersion = pv.GetString() ?? "0.0.0"; }
                 }
                 catch { }
             }
@@ -321,6 +547,13 @@ namespace SilverWolfLauncher
                 gameExecutablePath = File.ReadAllText(legacyPath).Trim();
                 TxtGamePath.Text = gameExecutablePath;
             }
+
+            // Cleanup legacy .txt version files
+            try { File.Delete(legacyPath); } catch {}
+            try { File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "server", "ps_version.txt")); } catch {}
+            try { File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "proxy", "proxy_version.txt")); } catch {}
+
+            UpdatePlayButton();
         }
 
         private void SaveConfig()
@@ -329,8 +562,10 @@ namespace SilverWolfLauncher
             var obj = new {
                 gamePath       = gameExecutablePath,
                 minimizeToTray = minimizeToTrayEnabled,
-                dontAskOnClose = this.dontAskOnClose,
-                autoServices   = ChkAutoServices.IsChecked ?? true
+                dontAskOnClose = dontAskOnClose,
+                autoServices   = ChkAutoServices.IsChecked ?? true,
+                serverVersion  = serverVersion,
+                proxyVersion   = proxyVersion
             };
             File.WriteAllText(configPath, JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true }));
         }
@@ -412,7 +647,6 @@ namespace SilverWolfLauncher
             PanelPatcher.Visibility = Visibility.Hidden;
             PanelLanguage.Visibility = Visibility.Hidden;
             PanelSRTools.Visibility = Visibility.Hidden;
-            PanelTutorials.Visibility = Visibility.Hidden;
             PanelSettings.Visibility = Visibility.Hidden;
             PanelInfo.Visibility = Visibility.Hidden;
             PanelProxy.Visibility = Visibility.Hidden;
@@ -421,7 +655,6 @@ namespace SilverWolfLauncher
             BtnPatcher.Style = (Style)Resources["ModernNavButton"];
             BtnLanguage.Style = (Style)Resources["ModernNavButton"];
             BtnSRTools.Style = (Style)Resources["ModernNavButton"];
-            BtnTutorials.Style = (Style)Resources["ModernNavButton"];
             BtnSettings.Style = (Style)Resources["ModernNavButton"];
             BtnInfo.Style = (Style)Resources["ModernNavButton"];
             BtnProxy.Style = (Style)Resources["ModernNavButton"];
@@ -432,8 +665,19 @@ namespace SilverWolfLauncher
         private void BtnPatcher_Click(object sender, RoutedEventArgs e) { SwitchPanel(PanelPatcher); BtnPatcher.Style = (Style)Resources["ActiveNavButton"]; }
         private void BtnLanguage_Click(object sender, RoutedEventArgs e) { SwitchPanel(PanelLanguage); BtnLanguage.Style = (Style)Resources["ActiveNavButton"]; }
         private void BtnSRTools_Click(object sender, RoutedEventArgs e) { SwitchPanel(PanelSRTools); BtnSRTools.Style = (Style)Resources["ActiveNavButton"]; }
-        private void BtnTutorials_Click(object sender, RoutedEventArgs e) { SwitchPanel(PanelTutorials); BtnTutorials.Style = (Style)Resources["ActiveNavButton"]; }
-        private void BtnSettings_Click(object sender, RoutedEventArgs e) { SwitchPanel(PanelSettings); BtnSettings.Style = (Style)Resources["ActiveNavButton"]; }
+        private void BtnSettings_Click(object sender, RoutedEventArgs e) 
+        { 
+            if (PanelSettings.Visibility == Visibility.Visible)
+            {
+                SwitchPanel(PanelHome); 
+                BtnHome.Style = (Style)Resources["ActiveNavButton"];
+            }
+            else
+            {
+                SwitchPanel(PanelSettings); 
+                BtnSettings.Style = (Style)Resources["ActiveNavButton"];
+            }
+        }
         private void BtnInfo_Click(object sender, RoutedEventArgs e) { SwitchPanel(PanelInfo); BtnInfo.Style = (Style)Resources["ActiveNavButton"]; }
 
         private void SwitchPanel(UIElement panel)
@@ -442,11 +686,11 @@ namespace SilverWolfLauncher
             panel.Visibility = Visibility.Visible;
             AnimatePanelIn(panel);
 
-            // Dynamic Background Blur (Exclude Home)
-            double targetBlur = (panel == PanelHome) ? 0 : 12; // 12 is a good "frosted" value
-            var blurAnim = new System.Windows.Media.Animation.DoubleAnimation(targetBlur, TimeSpan.FromMilliseconds(400));
-            blurAnim.EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut };
-            BackgroundBlur.BeginAnimation(System.Windows.Media.Effects.BlurEffect.RadiusProperty, blurAnim);
+            // Dynamic Background Dim (Exclude Home)
+            double targetOpacity = (panel == PanelHome) ? 0 : 0.8;
+            var dimAnim = new System.Windows.Media.Animation.DoubleAnimation(targetOpacity, TimeSpan.FromMilliseconds(300));
+            dimAnim.EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut };
+            BgDimOverlay.BeginAnimation(UIElement.OpacityProperty, dimAnim);
         }
 
         private void AnimatePanelIn(UIElement panel)
@@ -494,28 +738,6 @@ namespace SilverWolfLauncher
             }
         }
 
-        private void WebViewTutorials_InitializationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
-        {
-            if (e.IsSuccess)
-            {
-                WebViewTutorials.CoreWebView2.NavigationCompleted += async (s, args) => {
-                    await WebViewTutorials.CoreWebView2.ExecuteScriptAsync(@"
-                        (function() {
-                            var style = document.createElement('style');
-                            style.id = 'sw-launcher-style';
-                            if (document.getElementById('sw-launcher-style')) return;
-                            style.innerHTML = [                                
-                                '::-webkit-scrollbar { display: none !important; }',
-                                'html { overflow-x: hidden !important; max-width: 100% !important; }',
-                                'body { overflow-x: hidden !important; max-width: 100% !important; }'
-                            ].join(' ');
-                            document.head.appendChild(style);
-                        })();
-                    ");
-                };
-            }
-        }
-
         private void CmbLauncherLang_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (CmbLauncherLang.SelectedItem is ComboBoxItem item)
@@ -546,6 +768,20 @@ namespace SilverWolfLauncher
             catch { }
         }
 
+        private void UpdatePlayButton()
+        {
+            bool canPlay = !string.IsNullOrEmpty(gameExecutablePath) && File.Exists(gameExecutablePath);
+            if (BtnLaunchGame != null) 
+            {
+                BtnLaunchGame.IsEnabled = canPlay;
+                BtnLaunchGame.Opacity = canPlay ? 1.0 : 0.5;
+            }
+            if (TxtPlayLabel != null) 
+            {
+                TxtPlayLabel.Opacity = canPlay ? 1.0 : 0.5;
+            }
+        }
+
         private async void BtnBrowseGame_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -555,6 +791,7 @@ namespace SilverWolfLauncher
                 gameExecutablePath = openFileDialog.FileName;
                 TxtGamePath.Text = gameExecutablePath;
                 SaveConfig();
+                UpdatePlayButton();
                 await CheckAndPromptPSInstallation();
             }
         }
@@ -681,50 +918,21 @@ namespace SilverWolfLauncher
             return code switch { "cn" => LanguageService.GameLanguage.CN, "jp" => LanguageService.GameLanguage.JP, "kr" => LanguageService.GameLanguage.KR, _ => LanguageService.GameLanguage.EN };
         }
 
-        private async void BtnUpdatePS_Click(object sender, RoutedEventArgs e)
-        {
-            string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
-            BtnUpdatePS.IsEnabled = false;
-
-            // Check PS Server
-            var (psAvail, psVer, psUrl) = await updateService.CheckForUpdateAsync(launcherDir);
-            // Check Proxy
-            var (proxyAvail, proxyVer, proxyUrl) = await updateService.CheckProxyUpdateAsync(launcherDir);
-
-            if (!psAvail && !proxyAvail)
-            {
-                ShowInfo("UP TO DATE", "Private Server and Proxy are both up to date.");
-            }
-            else
-            {
-                string details = "";
-                if (psAvail) details += $"• PS Server → v{psVer}\n";
-                if (proxyAvail) details += $"• Proxy → v{proxyVer}";
-
-                ShowPrompt("UPDATE AVAILABLE", $"Updates ready:\n{details}\n\nDownload and install now?",
-                    async () => {
-                        if (psAvail) await PerformPSUpdate(launcherDir, psVer, psUrl);
-                        if (proxyAvail) await PerformProxyUpdate(launcherDir, proxyVer, proxyUrl);
-                    },
-                    "DOWNLOAD", "LATER");
-            }
-
-            BtnUpdatePS.IsEnabled = true;
-        }
+        // Removed duplicated BtnUpdatePS_Click
 
         private void ChkMinimizeToTray_Checked(object sender, RoutedEventArgs e)
         {
+            if (isInitializingUI) return;
             minimizeToTrayEnabled = true;
             SaveConfig();
-            ShowInfo("SETTINGS", "Minimize to Tray: ENABLED");
         }
 
         private void ChkMinimizeToTray_Unchecked(object sender, RoutedEventArgs e)
         {
+            if (isInitializingUI) return;
             minimizeToTrayEnabled = false;
             dontAskOnClose = false; // Reset if they disable it
             SaveConfig();
-            ShowInfo("SETTINGS", "Minimize to Tray: DISABLED (Exit completely)");
         }
 
         private void ChkAutoServices_Checked(object sender, RoutedEventArgs e)
@@ -743,12 +951,19 @@ namespace SilverWolfLauncher
         private async Task PerformPSUpdate(string launcherDir, string version = "", string url = "")
         {
             if (string.IsNullOrEmpty(url)) {
-                var info = await updateService.CheckForUpdateAsync(launcherDir);
+                var info = await updateService.CheckForUpdateAsync(serverVersion);
                 url = info.DownloadUrl; version = info.LatestVersion;
+                if (string.IsNullOrEmpty(url)) {
+                    if (string.IsNullOrEmpty(updateService.LastErrorMessage))
+                        ShowInfo("UP TO DATE", "Private Server is already up to date.");
+                    else
+                        ShowInfo("UPDATE ERROR", updateService.LastErrorMessage);
+                    return;
+                }
             }
             GridStatus.Visibility = Visibility.Visible;
             try {
-                bool success = await updateService.DownloadAndInstallAsync(launcherDir, url, version, msg => {
+                bool success = await updateService.DownloadAndInstallAsync(launcherDir, url, msg => {
                     Dispatcher.Invoke(() => {
                         TxtGlobalStatus.Text = msg.ToUpper();
                         bool hasPercent = msg.Contains("%");
@@ -759,8 +974,13 @@ namespace SilverWolfLauncher
                         }
                     });
                 });
-                if (success) ShowInfo("INSTALLED", "Private Server installed to ./server/ successfully!");
-                else ShowInfo("ERROR", "Download failed. Check your internet connection.");
+                if (success) {
+                    serverVersion = version;
+                    SaveConfig();
+                    LoadVersionInfo();
+                    ShowInfo("INSTALLED", "Private Server installed to ./server/ successfully!");
+                }
+                else ShowInfo("ERROR", updateService.LastErrorMessage);
             } finally {
                 GridStatus.Visibility = Visibility.Collapsed;
                 ProgGlobal.IsIndeterminate = false;
@@ -772,14 +992,24 @@ namespace SilverWolfLauncher
         {
             string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
             BtnUpdateProxy.IsEnabled = false;
-            var (avail, ver, url) = await updateService.CheckProxyUpdateAsync(launcherDir);
+            var originalContent = BtnUpdateProxy.Content;
+            BtnUpdateProxy.Content = "CHECKING...";
             
-            if (avail) {
-                await PerformProxyUpdate(launcherDir, ver, url);
-            } else {
-                ShowInfo("UP TO DATE", "Proxy is already the latest version.");
+            try
+            {
+                var (avail, ver, url) = await updateService.CheckProxyUpdateAsync(proxyVersion);
+                
+                if (avail) {
+                    await PerformProxyUpdate(launcherDir, ver, url);
+                } else {
+                    ShowInfo("UP TO DATE", "Proxy is already the latest version.");
+                }
             }
-            BtnUpdateProxy.IsEnabled = true;
+            finally
+            {
+                BtnUpdateProxy.Content = originalContent;
+                BtnUpdateProxy.IsEnabled = true;
+            }
         }
 
         private void BtnOpenServerFolder_Click(object sender, RoutedEventArgs e)
@@ -799,12 +1029,19 @@ namespace SilverWolfLauncher
         private async Task PerformProxyUpdate(string launcherDir, string version = "", string url = "")
         {
             if (string.IsNullOrEmpty(url)) {
-                var info = await updateService.CheckProxyUpdateAsync(launcherDir);
+                var info = await updateService.CheckProxyUpdateAsync(proxyVersion);
                 url = info.DownloadUrl; version = info.LatestVersion;
+                if (string.IsNullOrEmpty(url)) {
+                    if (string.IsNullOrEmpty(updateService.LastErrorMessage))
+                        ShowInfo("UP TO DATE", "Proxy is already up to date.");
+                    else
+                        ShowInfo("UPDATE ERROR", updateService.LastErrorMessage);
+                    return;
+                }
             }
             GridStatus.Visibility = Visibility.Visible;
             try {
-                bool success = await updateService.DownloadAndInstallProxyAsync(launcherDir, url, version, msg => {
+                bool success = await updateService.DownloadAndInstallProxyAsync(launcherDir, url, msg => {
                     Dispatcher.Invoke(() => {
                         TxtGlobalStatus.Text = msg.ToUpper();
                         bool hasPercent = msg.Contains("%");
@@ -815,12 +1052,105 @@ namespace SilverWolfLauncher
                         }
                     });
                 });
-                if (success) ShowInfo("INSTALLED", "Proxy installed to ./proxy/ successfully!");
-                else ShowInfo("ERROR", "Proxy download failed.");
+                if (success) {
+                    proxyVersion = version;
+                    SaveConfig();
+                    LoadVersionInfo();
+                    ShowInfo("INSTALLED", "Proxy installed to ./proxy/ successfully!");
+                }
+                else ShowInfo("ERROR", updateService.LastErrorMessage);
             } finally {
                 GridStatus.Visibility = Visibility.Collapsed;
                 ProgGlobal.IsIndeterminate = false;
                 ProgGlobal.Value = 0;
+            }
+        }
+
+        private async void BtnInstallPSFromFile_Click(object sender, RoutedEventArgs e)
+        {
+            string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
+            OpenFileDialog dialog = new OpenFileDialog { Filter = "ZIP Files (*.zip)|*.zip|7z Files (*.7z)|*.7z|All Files (*.*)|*.*" };
+            
+            if (dialog.ShowDialog() == true)
+            {
+                GridStatus.Visibility = Visibility.Visible;
+                try
+                {
+                    string serverDir = Path.Combine(launcherDir, "server");
+                    Directory.CreateDirectory(serverDir);
+                    
+                    TxtGlobalStatus.Text = "Installing from file...";
+                    ProgGlobal.IsIndeterminate = true;
+                    
+                    await Task.Run(() =>
+                    {
+                        try
+                        {
+                            using var archive = ArchiveFactory.Open(dialog.FileName);
+                            foreach (var entry in archive.Entries)
+                                if (!entry.IsDirectory)
+                                    entry.WriteToDirectory(serverDir, new ExtractionOptions { ExtractFullPath = true, Overwrite = true });
+                        }
+                        catch (Exception ex)
+                        {
+                            Dispatcher.Invoke(() => ShowInfo("ERROR", $"Failed to extract: {ex.Message}"));
+                        }
+                    });
+                    
+                    // Save newly installed version to global config properly
+                    serverVersion = "1.0.0";
+                    SaveConfig();
+                    LoadVersionInfo();
+                    ShowInfo("SUCCESS", "Private Server installed successfully!");
+                }
+                catch (Exception ex)
+                {
+                    ShowInfo("ERROR", $"Installation failed: {ex.Message}");
+                }
+                finally
+                {
+                    GridStatus.Visibility = Visibility.Collapsed;
+                    ProgGlobal.IsIndeterminate = false;
+                    ProgGlobal.Value = 0;
+                }
+            }
+        }
+
+        private async void BtnInstallProxyFromFile_Click(object sender, RoutedEventArgs e)
+        {
+            string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
+            OpenFileDialog dialog = new OpenFileDialog { Filter = "EXE Files (*.exe)|*.exe|All Files (*.*)|*.*" };
+            
+            if (dialog.ShowDialog() == true)
+            {
+                GridStatus.Visibility = Visibility.Visible;
+                try
+                {
+                    string proxyDir = Path.Combine(launcherDir, "proxy");
+                    Directory.CreateDirectory(proxyDir);
+                    string destFile = Path.Combine(proxyDir, "firefly-go-proxy.exe");
+                    
+                    TxtGlobalStatus.Text = "Installing from file...";
+                    ProgGlobal.IsIndeterminate = true;
+                    
+                    File.Copy(dialog.FileName, destFile, overwrite: true);
+                    
+                    // Save newly installed version to global config properly
+                    proxyVersion = "1.0.0";
+                    SaveConfig();
+                    LoadVersionInfo();
+                    ShowInfo("SUCCESS", "Proxy installed successfully!");
+                }
+                catch (Exception ex)
+                {
+                    ShowInfo("ERROR", $"Installation failed: {ex.Message}");
+                }
+                finally
+                {
+                    GridStatus.Visibility = Visibility.Collapsed;
+                    ProgGlobal.IsIndeterminate = false;
+                    ProgGlobal.Value = 0;
+                }
             }
         }
     }

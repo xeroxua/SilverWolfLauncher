@@ -16,51 +16,61 @@ namespace SilverWolfLauncher.Services
         private const string ServerZipName     = "prebuild_win_x86.zip";
         private const string ProxyExeName      = "firefly-go-proxy.exe";
 
-        // ── PS Server ──────────────────────────────────────────────────────────────
+        private static readonly HttpClient _httpClient = CreateSharedClient();
+        public string LastErrorMessage { get; set; } = "";
 
-        public async Task<(bool Available, string LatestVersion, string DownloadUrl)> CheckForUpdateAsync(string _unused)
+        private static HttpClient CreateSharedClient()
         {
-            return await CheckReleaseAsync(ServerReleaseUrl, "ps_version.txt", r => r.EndsWith(".zip") || r.EndsWith(".7z"));
+            var c = new HttpClient { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
+            c.DefaultRequestHeaders.Add("User-Agent", "SilverWolf-Launcher");
+            return c;
         }
 
-        public async Task<bool> DownloadAndInstallAsync(string launcherDir, string downloadUrl, string version, Action<string> onProgress)
+        // ── PS Server ──────────────────────────────────────────────────────────────
+
+        public async Task<(bool Available, string LatestVersion, string DownloadUrl)> CheckForUpdateAsync(string currentVersion)
         {
-            // Auto-organize: PS server always goes into ./server/
-            string serverDir = Path.Combine(launcherDir, "server");
+            return await CheckReleaseAsync(ServerReleaseUrl, currentVersion, r => r.EndsWith(".zip") || r.EndsWith(".7z"));
+        }
+
+        public async Task<bool> DownloadAndInstallAsync(string targetDir, string downloadUrl, Action<string> onProgress)
+        {
+            // Auto-organize: PS server always goes into ./server/ inside target directory
+            string serverDir = Path.Combine(targetDir, "server");
             Directory.CreateDirectory(serverDir);
 
-            bool ok = await DownloadAndExtractAsync(downloadUrl, serverDir, onProgress);
-            if (ok) SetVersionFile(serverDir, "ps_version.txt", version);
-            return ok;
+            return await DownloadAndExtractAsync(downloadUrl, serverDir, onProgress);
         }
 
         // ── Proxy ──────────────────────────────────────────────────────────────────
 
-        public async Task<(bool Available, string LatestVersion, string DownloadUrl)> CheckProxyUpdateAsync(string _unused)
+        public async Task<(bool Available, string LatestVersion, string DownloadUrl)> CheckProxyUpdateAsync(string currentVersion)
         {
-            return await CheckReleaseAsync(ProxyReleaseUrl, "proxy_version.txt", r => r.Equals(ProxyExeName, StringComparison.OrdinalIgnoreCase));
+            return await CheckReleaseAsync(ProxyReleaseUrl, currentVersion, r => r.Equals(ProxyExeName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public async Task<bool> DownloadAndInstallProxyAsync(string launcherDir, string downloadUrl, string version, Action<string> onProgress)
+        public async Task<bool> DownloadAndInstallProxyAsync(string targetDir, string downloadUrl, Action<string> onProgress)
         {
-            // Auto-organize: Proxy always goes into ./proxy/
-            string proxyDir = Path.Combine(launcherDir, "proxy");
+            // Auto-organize: Proxy always goes into ./proxy/ inside target directory
+            string proxyDir = Path.Combine(targetDir, "proxy");
             Directory.CreateDirectory(proxyDir);
 
-            bool ok = await DownloadFileAsync(downloadUrl, Path.Combine(proxyDir, ProxyExeName), onProgress);
-            if (ok) SetVersionFile(proxyDir, "proxy_version.txt", version);
-            return ok;
+            return await DownloadFileAsync(downloadUrl, Path.Combine(proxyDir, ProxyExeName), onProgress);
         }
 
         // ── Shared helpers ─────────────────────────────────────────────────────────
 
         private async Task<(bool Available, string LatestVersion, string DownloadUrl)> CheckReleaseAsync(
-            string apiUrl, string versionFile, Func<string, bool> assetPredicate)
+            string apiUrl, string currentVersion, Func<string, bool> assetPredicate)
         {
+            LastErrorMessage = string.Empty;
             try
             {
-                using HttpClient client = MakeClient();
-                var json = await client.GetStringAsync(apiUrl);
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(30));
+                var response = await _httpClient.GetAsync(apiUrl, cts.Token);
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync(cts.Token);
+                
                 using var doc = JsonDocument.Parse(json);
 
                 // Gitea releases endpoint returns an array
@@ -68,7 +78,11 @@ namespace SilverWolfLauncher.Services
                 JsonElement release;
                 if (root.ValueKind == JsonValueKind.Array)
                 {
-                    if (root.GetArrayLength() == 0) return (false, "", "");
+                    if (root.GetArrayLength() == 0)
+                    {
+                        LastErrorMessage = "No releases found on server";
+                        return (false, "", "");
+                    }
                     release = root[0];
                 }
                 else
@@ -77,10 +91,8 @@ namespace SilverWolfLauncher.Services
                 }
 
                 string latest = release.GetProperty("tag_name").GetString() ?? "";
-                string launcherDir = AppDomain.CurrentDomain.BaseDirectory;
-                string current  = GetVersionFile(launcherDir, versionFile);
 
-                if (latest == current) return (false, latest, "");
+                if (latest == currentVersion) return (false, latest, "");
 
                 string downloadUrl = "";
                 if (release.TryGetProperty("assets", out var assets))
@@ -96,10 +108,31 @@ namespace SilverWolfLauncher.Services
                     }
                 }
 
+                if (string.IsNullOrEmpty(downloadUrl))
+                {
+                    LastErrorMessage = "No matching asset found in release";
+                }
+
                 return (!string.IsNullOrEmpty(downloadUrl), latest, downloadUrl);
             }
-            catch
+            catch (HttpRequestException hex)
             {
+                LastErrorMessage = $"Network error: {hex.Message}. Check if you can access https://git.kain.io.vn";
+                return (false, "", "");
+            }
+            catch (JsonException jex)
+            {
+                LastErrorMessage = $"Invalid server response: {jex.Message}";
+                return (false, "", "");
+            }
+            catch (TaskCanceledException)
+            {
+                LastErrorMessage = "Connection timed out. The server (git.kain.io.vn) took too long to respond. Please try again later.";
+                return (false, "", "");
+            }
+            catch (Exception ex)
+            {
+                LastErrorMessage = $"Unexpected error: {ex.Message}";
                 return (false, "", "");
             }
         }
@@ -136,8 +169,15 @@ namespace SilverWolfLauncher.Services
         {
             try
             {
-                using HttpClient client = MakeClient();
-                using var resp = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                if (string.IsNullOrEmpty(url))
+                {
+                    LastErrorMessage = "Download URL is empty";
+                    onProgress("ERROR: Download URL is empty");
+                    return false;
+                }
+
+                onProgress($"Connecting to {new Uri(url).Host}...");
+                using var resp = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                 resp.EnsureSuccessStatusCode();
 
                 long? total = resp.Content.Headers.ContentLength;
@@ -147,51 +187,41 @@ namespace SilverWolfLauncher.Services
                 byte[] buf = new byte[81920];
                 long downloaded = 0;
                 int read;
+                var sw = System.Diagnostics.Stopwatch.StartNew();
                 while ((read = await src.ReadAsync(buf)) > 0)
                 {
                     await dest.WriteAsync(buf.AsMemory(0, read));
                     downloaded += read;
-                    if (total.HasValue)
-                        onProgress($"Downloading... {downloaded * 100 / total.Value}%");
+                    if (total.HasValue && total.Value > 0)
+                    {
+                        double pct = downloaded * 100.0 / total.Value;
+                        double elapsed = sw.Elapsed.TotalSeconds;
+                        string speed = elapsed > 0.01 ? FormatSpeed(downloaded / elapsed) : "...";
+                        onProgress($"Downloading...  {speed}  {pct:F1}%");
+                    }
                 }
+                LastErrorMessage = "";
                 return true;
+            }
+            catch (HttpRequestException hex)
+            {
+                LastErrorMessage = $"Network error: {hex.Message}. Check your internet connection.";
+                onProgress($"ERROR: {LastErrorMessage}");
+                return false;
             }
             catch (Exception ex)
             {
-                onProgress("Download error: " + ex.Message);
+                LastErrorMessage = $"Download failed: {ex.Message}";
+                onProgress($"ERROR: {LastErrorMessage}");
                 return false;
             }
         }
 
-        private static HttpClient MakeClient()
+        private static string FormatSpeed(double bytesPerSec)
         {
-            var c = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
-            c.DefaultRequestHeaders.Add("User-Agent", "SilverWolf-Launcher");
-            return c;
+            if (bytesPerSec >= 1024 * 1024) return $"{bytesPerSec / (1024 * 1024):F1}MB/s";
+            if (bytesPerSec >= 1024) return $"{bytesPerSec / 1024:F1}KB/s";
+            return $"{bytesPerSec:F0}B/s";
         }
-
-        public string GetCurrentVersion(string dir) => GetVersionFile(dir, "ps_version.txt");
-
-        private string GetVersionFile(string dir, string file)
-        {
-            string path = Path.Combine(dir, file);
-            if (File.Exists(path)) return File.ReadAllText(path).Trim();
-
-            // Also check subfolders (server/ or proxy/)
-            string serverPath = Path.Combine(dir, "server", file);
-            if (File.Exists(serverPath)) return File.ReadAllText(serverPath).Trim();
-
-            string proxyPath = Path.Combine(dir, "proxy", file);
-            if (File.Exists(proxyPath)) return File.ReadAllText(proxyPath).Trim();
-
-            return "0.0.0";
-        }
-
-        private void SetVersionFile(string dir, string file, string version)
-        {
-            File.WriteAllText(Path.Combine(dir, file), version);
-        }
-
-        public void SetCurrentVersion(string dir, string version) => SetVersionFile(dir, "ps_version.txt", version);
     }
 }

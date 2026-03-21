@@ -77,9 +77,9 @@ namespace SilverWolfLauncher.Services
             switch (lang)
             {
                 case GameLanguage.EN: return "en";
-                case GameLanguage.CN: return "cn";
-                case GameLanguage.JP: return "jp";
-                case GameLanguage.KR: return "kr";
+                case GameLanguage.CN: return "zh-cn";
+                case GameLanguage.JP: return "ja";
+                case GameLanguage.KR: return "ko";
                 default: return "en";
             }
         }

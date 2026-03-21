@@ -3,7 +3,7 @@
 
 ![Silver Wolf Launcher Preview](Assets/preview.png)
 
-**Silver Wolf Launcher** คือเครื่องมือระดับพรีเมียมที่ออกแบบมาเพื่อให้การจัดการและเข้าเล่น **Honkai: Star Rail Private Server** เป็นเรื่องง่าย สวยงาม และทรงพลัง พัฒนาด้วยเทคโนโลยีล่าสุดอย่าง **.NET 10.0** และ **WPF** พร้อมดีไซน์ที่ได้รับแรงบันดาลใจจากสไตล์ Mobile UI ของเกมโดยตรง
+**Silver Wolf Launcher** คือเครื่องมือระดับพรีเมียมที่ออกแบบมาเพื่อให้การจัดการและเข้าเล่น **Honkai: Star Rail Private Server** เป็นเรื่องง่าย สวยงาม และทรงพลัง พัฒนาด้วยเทคโนโลยีล่าสุดอย่าง **.NET 10.0** และ **WPF**
 
 > [!IMPORTANT]
 > **Project Status**: ปัจจุบันอยู่ในสถานะ **Early Access** ผลงานชิ้นนี้พัฒนาโดยอิสระเพื่อชุมชน หากพบปัญหาท่านสามารถแจ้งได้ที่ [Discord Community](https://discord.gg/QwfTnEdAtN)
@@ -12,52 +12,39 @@
 
 ## ✨ คุณสมบัติที่โดดเด่น (Key Features)
 
-*   **🎨 Premium HSR Aesthetic**: อินเทอร์เฟซแบบ Glassmorphism ที่สวยงามและลื่นไหล พร้อมระบบอนิเมชั่นที่ถอดแบบมาจากตัวเกม
-*   **⚡ One-Click Launch**: ระบบเริ่มเกมที่รวบรวมการเปิด Proxy และ Private Server ไว้ในคลิกเดียว
-*   **🛡️ Robust Watchdog**: ระบบเฝ้าระวังอัตโนมัติ หาก Server หรือ Proxy ปิดตัวลง Launcher จะพยายาม Re-launch ให้ทันทีภายใน 5 วินาที
-*   **🩹 Smart Patcher**: รองรับการลง Patch (.7z, .zip) แบบอัตโนมัติ พร้อมระบบจัดการความขัดแย้งของไฟล์ผ่าน `hpatchz`
-*   **🌐 Seamless Web Integration**: รวมเครื่องมือเสริม (SR Tools) และคู่มือการเล่นผ่าน WebView2 พร้อมระบบ **Airspace-Fix** (หน้าต่างแจ้งเตือนจะไม่ถูกเว็บทับ)
-*   **🌍 Localization Expert**: รองรับการเปลี่ยนภาษาทั้งตัวโปรแกรมและตัวเกม (Text/Voice) อย่างสมบูรณ์
-*   **🌙 System Tray Integration**: ย่อโปรแกรมลง Tray พร้อมเมนูทางลัดเพื่อประหยัดทรัพยากรเครื่อง
+*   **🎨 Premium HSR Aesthetic**: อินเทอร์เฟซแบบ Glassmorphism สวยงามและลื่นไหล
+*   **⚡ One-Click Launch**: ระบบเริ่มเกมรวม Proxy และ Server ในคลิกเดียว
+*   **🔄 Integrated Auto-Update**: ระบบตรวจสอบและอัปเดตตัวเองอัตโนมัติผ่าน GitHub
+*   **🛡️ Robust Watchdog**: ระบบเฝ้าระวังและรีสตาร์ทบริการอัตโนมัติภายใน 5 วินาที
+*   **🚫 Single Instance Only**: ระบบป้องกันการรันโปรแกรมซ้อนกัน เพื่อความเสถียรสูงสุด
+*   **🌐 Seamless Integration**: รวมเครื่องมือเสริม (SR Tools) และตัว Patch ไฟล์เกมไว้ที่เดียว
+*   **🔘 Smart Play Button**: ปุ่มเริ่มเกมจะปรับเปลี่ยนสถานะตามความถูกต้องของ Path เกม
 
 ---
 
 ## 🛠️ การติดตั้งและเริ่มต้นใช้งาน (Getting Started)
 
 ### สำหรับผู้ใช้งานทั่วไป (Users)
-1.  **Set Game Path**: เข้าไปที่ส่วนจัดการตำแหน่งไฟล์ เลือกไฟล์ `.exe` ของเกม Honkai: Star Rail
-2.  **Environment Check**: โปรแกรมจะตรวจสอบไฟล์ Private Server ให้อัตโนมัติ หากไม่มีสามารถกด **Update** เพื่อติดตั้งได้ทันที
-3.  **Launch**: กดปุ่ม **LAUNCH** เพื่อเริ่มการเดินทางข้ามกลุ่มดาว
+*   **Download**: ดาวน์โหลดไฟล์ `SilverWolfLauncher.exe` จากหน้า **Releases**
+*   **Update**: เมื่อมีเวอร์ชันใหม่ จะมีปุ่ม **UPDATE NOW** ปรากฏขึ้นในหน้า Home
 
 ### สำหรับนักพัฒนา (Developers)
-หากท่านต้องการร่วมพัฒนาหรือคอมไพล์โค้ดด้วยตนเอง:
-*   **Requirements**: Visual Studio 2022 หรือ .NET 10.0 SDK
-*   **Build**:
-    ```bash
-    dotnet build -c Release
-    ```
+*   **Dev Build**: รันโค้ดผ่าน Visual Studio หรือใช้คำสั่ง `dotnet build` เพื่อได้ไฟล์แบบแยกโฟลเดอร์ปกติ (เหมาะสำหรับการ Debug)
+*   **Release Build**: การรันไฟล์เดียว (Single File) **เฉพาะสำหรับแจกจ่ายเท่านั้น**
+    *   รันสคริปต์: `Build-Release.ps1`
+    *   หรือใช้คำสั่ง: `dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./Publish`
+
+---
+
+## 📜 ประวัติการอัปเดต (Version History)
+ท่านสามารถดูรายละเอียดการเปลี่ยนแปลงและ Update Details ทั้งหมดได้ที่ไฟล์ [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
 ## 🛡️ ความปลอดภัยและความเป็นส่วนตัว (Security & Privacy)
-
-*   **No Data Collections**: เราไม่มีการเก็บข้อมูลส่วนตัวใดๆ ไฟล์ `config.json` จะถูกเก็บไว้เฉพาะในเครื่องของผู้ใช้เท่านั้น
-*   **Open Source**: ท่านสามารถตรวจสอบโค้ดทั้งหมดได้เพื่อความมั่นใจในความโปร่งใส
-
----
-
-## 📜 สัญญาอนุญาต (License)
-
-โปรเจกต์นี้เปิดเผยซอร์สโค้ดภายใต้สัญญาอนุญาต **Apache License 2.0** ท่านสามารถนำไปศึกษาและพัฒนาต่อยอดได้ตามเงื่อนไขที่กำหนด
-
----
-
-## 💬 การสนับสนุนและชุมชน (Support)
-
-*   **Discord**: [Silver Wolf Community](https://discord.gg/QwfTnEdAtN)
-*   **Developer**: [Follow xeroxua on GitHub](https://github.com/xeroxua)
+*   **No Data Collections**: เราไม่มีการเก็บข้อมูลส่วนตัวใดๆ ไฟล์โปรไฟล์ถูกเก็บไว้ในเครื่องผู้ใช้เท่านั้น
 
 ---
 
 **Crafted with 💖 by xeroxua**
-*Disclaimer: Silver Wolf Launcher เป็นโปรเจกต์อิสระ ไม่ได้มีความเกี่ยวข้องกับ HoYoverse หรือบริษัทเจ้าของลิขสิทธิ์เกมแต่อย่ายใด*
+*Disclaimer: Silver Wolf Launcher เป็นโปรเจกต์อิสระ ไม่ได้มีความเกี่ยวข้องกับ HoYoverse*
